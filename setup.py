@@ -24,7 +24,7 @@ params = {'author': 'Sheena Scroggins',
           'version': __version__,
           'package_data': {'msings': [join('data',f) for f in ['sha','ver']]},
           'install_requires': [
-              'numpy==1.9.1',
+              'numpy==1.9.2',
               'natsort==3.5.2'
           ]
           }

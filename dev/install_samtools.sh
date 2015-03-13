@@ -19,8 +19,8 @@ if $prefix/bin/samtools 2>&1 | grep -q ${version}; then
     exit 0
 else
     cd $srcdir
-    wget -N ftp://jester.labmed.uw.edu/src/samtools-${version}_labmed.tar.bz2
-    tar -xf samtools-${version}_labmed.tar.bz2
+    wget -N http://sourceforge.net/projects/samtools/files/samtools/${version}/samtools-${version}.tar.bz2
+    tar -xf samtools-${version}.tar.bz2
     make CFLAGS='-g -Wall -O2 -fPIC' -C samtools-${version}
     cp samtools-${version}/samtools $prefix/bin/
 fi    

@@ -12,7 +12,6 @@ fi
 version=$1
 #v2.3.6
 prefix=$2
-srcdir=$prefix/src
 
 if [ -f $prefix/bin/VarScan.${version}.jar ]
 then

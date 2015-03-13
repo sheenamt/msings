@@ -26,7 +26,7 @@ if [[ -z $PYTHON ]]; then
     PYTHON=$(which python)
 fi
 
-mkdir -p src
+
 
 SAMTOOLS_VERSION=0.1.18
 VARSCAN_VERSION=v2.3.7
@@ -45,6 +45,7 @@ else
 fi
 
 source $venv/bin/activate
+mkdir -p $venv/src
 
 # full path; set by activate
 venv=$VIRTUAL_ENV
