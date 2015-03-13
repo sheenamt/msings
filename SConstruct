@@ -16,7 +16,7 @@ from ConfigParser import SafeConfigParser
 import ConfigParser
 from SCons.Script import (Decider, Variables, Depends, Alias, Help,
                           Flatten, AllowSubstExceptions, Copy)
-from bioscons.slurm import SlurmEnvironment
+
 
 Decider('MD5-timestamp')
 
@@ -78,6 +78,7 @@ PERL5LIB = [path.join(venv, 'bin'),
 scons_env = dict(os.environ,PATH=':'.join(PATH), PERL5LIB=':'.join(PERL5LIB))
 #    THREADS_ALLOC=str(nproc))
 
+from bioscons.slurm import SlurmEnvironment
 parent_env = SlurmEnvironment(
     ENV = scons_env,
     variables= scons_vars,
