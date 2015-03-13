@@ -39,7 +39,7 @@ This pipeline is designed to be run inside its own virtualenv, specified in sett
 
      $ bash dev/bootstrap.sh /different/virtual/path
 
-To use the virtualenv, including the programs (bwa, samtools, gatk, msi), run:
+To use the virtualenv, including the programs (varscan, samtools, msi), run:
      $ source msings-env/bin/activate
 
 Development (developers only):
@@ -70,10 +70,10 @@ Please note that both your reference genome and bed files MUST follow the conven
 
 Output files:
 ------------
-For each specimen:
- *.MSI.txt = very detailed information about instability and distribution of alleles of differing length.  Raw data that is used to generate final MSI calls.
- *.MSI_output.txt = output of Varscan readcounts function
- *.MSI_Analysis.txt = Binary matrix of interpreted instability (1) or stability (0) at each locus. Loci with insufficient coverage for instability calling are left blank. Summary statistics and interpretation of results are provided.
+For each sample run, the following will be produced:
+ * SAMPLE.MSI.txt = very detailed information about instability and distribution of alleles of differing length.  Raw data that is used to generate final MSI calls.
+ * SAMPLE.MSI_output.txt = output of Varscan readcounts function, an intermediate file.
+ * SAMPLE.MSI_Analysis.txt = Binary matrix of interpreted instability (1) or stability (0) at each locus. Loci with insufficient coverage for instability calling are left blank. Summary statistics and interpretation of results are provided.
 
 For the entire run, a "top level" output represented as a binary matrix of interpreted instability (1) or stability (0) at each locus is provided if the count_msi.py function is run. Loci with insuffient coverage for instability calling are left blank. Summary statistics and interpretation of results are provided.
 
@@ -132,9 +132,9 @@ The folllwing instructions will allow users to set up analysis for their custom 
 
 5. Now that we have CUSTOM_MSI_BED and CUSTOM_MSI_INTERVALS, update the settings.conf to reflect these:
 
-   msi_bed = /path/to/custom_MSI_BED
+  msi_bed = /path/to/custom_MSI_BED
 
-   msi_intervals = /path/to/CUSTOM_MSI_INTERVALS
+  msi_intervals = /path/to/CUSTOM_MSI_INTERVALS
 
 6. Run analysis to generate a baseline file from MSI negative specimens.  Edit the settings.conf file to point to the absolute path of the MSI negative specimen BAMS and provide a name for the desired output folder: 
 
@@ -169,7 +169,7 @@ NOTE: This process only need to be done once per assay/target data set. Files ma
 
  msi_baseline = /path/to/CUSTOM_MSI_BASELINE
  
- Once the settings.conf file is updated for the new custom files, execution is the same as default files.  
+Once the settings.conf file is updated for the new custom files, execution is the same as for Exome / TCGA data sets (above).  
 
 10. To test that everything is installed and all inputs are specified correctly, the -n flag can be used: 
 
@@ -193,8 +193,8 @@ Tests:
    ./testall
 
 Should yield the following message:
-Ran 11 tests in 0.068s
+ Ran 11 tests in 0.068s
 
-OK
+ OK
 
 https://bitbucket.org/uwlabmed/msings
