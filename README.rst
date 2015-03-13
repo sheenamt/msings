@@ -19,10 +19,7 @@ Dependencies:
 * git
 * Installed in virtualenv:
 
- * BWA (VERSION=0.6.1)
  * SAMTOOLS (VERSION=0.1.18)
- * GATK (VERSION=3.2-2)
- * PICARD (VERSION=1.113)
  * VARSCAN (VERSION=v2.3.7)
 
 Installation:
