@@ -28,10 +28,7 @@ fi
 
 mkdir -p src
 
-BWA_VERSION=0.6.1
 SAMTOOLS_VERSION=0.1.18
-GATK_VERSION=3.2-2
-PICARD_VERSION=1.113
 VARSCAN_VERSION=v2.3.7
 
 # Create a virtualenv using a specified version of the virtualenv
@@ -53,17 +50,9 @@ source $venv/bin/activate
 venv=$VIRTUAL_ENV
 
 echo $venv
-# install BWA_VERSION=0.6.1
-bash dev/install_bwa.sh ${BWA_VERSION} $venv
 
-# # install samtools 
+# install samtools 
 bash dev/install_samtools.sh ${SAMTOOLS_VERSION} $venv
-
-# install GATK_VERSION=3.2
-bash dev/install_gatk.sh ${GATK_VERSION} $venv
-
-# install PICARD_VERSION=1.72
-bash dev/install_picard.sh ${PICARD_VERSION} $venv
 
 # install VARSCAN_VERSION=v2.3.7
 bash dev/install_varscan.sh ${VARSCAN_VERSION} $venv
