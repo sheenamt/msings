@@ -84,11 +84,12 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
         try:
             specimens[score][pfx]="{0:.4f}".format(float(msi_loci)/total_loci)
             if min_thres <= float(specimens[score][pfx]) <= max_thres:
-                specimens[status][pfx]="+"
+                specimens[status][pfx]="POS"
             else:
-                specimens[status][pfx]="-"
+                specimens[status][pfx]="NEG"
         except ZeroDivisionError:
-            specimens[status][pfx]="-"
+            print "zero error"
+            specimens[status][pfx]="NED"
     fieldnames = variant_keys + list(prefixes) 
 
     return specimens, prefixes, fieldnames, variant_keys            
