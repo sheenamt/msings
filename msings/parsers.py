@@ -87,7 +87,7 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
                 specimens[status][pfx]="IND"
             elif float(specimens[score][pfx]) >= max_thres:
                 specimens[status][pfx]="POS"
-            elif float(specimens[score][pfx]) <= min_thres:
+            elif float(specimens[score][pfx]) < min_thres:
                 specimens[status][pfx]="NEG"
         except ZeroDivisionError:
             specimens[status][pfx]="NEG"
