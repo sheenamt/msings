@@ -61,11 +61,11 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
 
     #Parse the user defined thresholds:
     if len(threshold) == 1:
-        min_thres=threshold
-        max_thres=1
+        min_thres=float(threshold)
+        max_thres=float(threshold)
     elif len(threshold) == 2:
-        min_thres=min(threshold)
-        max_thres=max(threshold)
+        min_thres=float(min(threshold))
+        max_thres=float(max(threshold))
     else:
         sys.exit("Wrong number of -t thresholds given")
     for pfx in prefixes:    
@@ -83,12 +83,14 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
         specimens[msi][pfx]=msi_loci
         try:
             specimens[score][pfx]="{0:.4f}".format(float(msi_loci)/total_loci)
-            if min_thres < float(specimens[score][pfx]) < max_thres:
-                specimens[status][pfx]="IND"
-            elif float(specimens[score][pfx]) >= max_thres:
+            #POS if above or equal to max threshold
+            if float(specimens[score][pfx]) >= max_thres:
                 specimens[status][pfx]="POS"
             elif float(specimens[score][pfx]) < min_thres:
                 specimens[status][pfx]="NEG"
+            # If the score is between thresholds, its indeterminate
+            elif min_thres < float(specimens[score][pfx]) < max_thres:
+                specimens[status][pfx]="IND"
         except ZeroDivisionError:
             specimens[status][pfx]="NEG"
     fieldnames = variant_keys + list(prefixes) 
