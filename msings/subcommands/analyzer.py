@@ -73,8 +73,10 @@ def calc_msi_dist(site_info,msi_sites):
                     #Keep tally of mutants seen 
                     msi_sites[key]['mutant_tally']+=1
                     #If we haven't seen this length of mutation, add it
-                    allele_fraction=reads/float(msi_sites[key]['site_depth'])
-
+                    try:
+                        allele_fraction=reads/float(msi_sites[key]['site_depth'])
+                    except ZeroDivisionError:
+                        allele_fraction=0.0
                     if not length in msi_sites[key]['indels'].keys():
                         msi_sites[key]['indels'][length]={'allele_fraction':allele_fraction}
                         msi_sites[key]['indels'][length]['mutant_depth']=reads
