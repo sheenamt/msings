@@ -156,7 +156,7 @@ def calc_summary_stats(msi_sites, cutoff):
                 wildtype_fraction=float(average_depth-info['mutant_depth'])/average_depth
                 wildtype_depth=int(average_depth-info['mutant_depth'])
             else:
-                wildtype_fraction, wildtype_tally=0,0
+                wildtype_fraction, wildtype_depth=0,0
                 sites[0]='0:0:0'
             if info['indels']:
                 sites=calc_wildtype(info['indels'], wildtype_depth, wildtype_fraction)
