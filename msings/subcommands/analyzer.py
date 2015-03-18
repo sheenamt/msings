@@ -129,7 +129,7 @@ def calc_std_peaks(peaks):
             i=+1
 
     a=array(std_peaks)
-    stddev=std(a)
+    stddev=format(std(a),'.6f')
     
     return stddev
 

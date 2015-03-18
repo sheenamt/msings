@@ -61,11 +61,11 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
 
     #Parse the user defined thresholds:
     if len(threshold) == 1:
-        min_thres=threshold
-        max_thres=1
+        min_thres=float(threshold)
+        max_thres=float(threshold)
     elif len(threshold) == 2:
-        min_thres=min(threshold)
-        max_thres=max(threshold)
+        min_thres=float(min(threshold))
+        max_thres=float(max(threshold))
     else:
         sys.exit("Wrong number of -t thresholds given")
     for pfx in prefixes:    
