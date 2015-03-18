@@ -51,7 +51,7 @@ def action(args):
     if args.msi_threshold:
         threshold=args.msi_threshold        
     else:
-        threshold=[0.2,]
+        threshold=[0.2,0.2]
     control_file = args.control_file
     chosen_parser='{}(files, control_file, specimens, prefixes, variant_keys, multiplier,threshold)'.format(analysis_type)
     specimens, prefixes, fieldnames, variant_keys=eval(chosen_parser)
