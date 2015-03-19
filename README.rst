@@ -87,9 +87,21 @@ Files specific for analysis of TCGA exome data are provided in the doc/ director
 
 1. Edit the settings.conf to point to the absolute path of the input bams, the name of the control sample, and the path to the reference fasta used to align this bam:
 
-    datadir = /path/to/inputbamfiles  
     baseline_control = control_name
+
     ref_fasta = /path/to/ref.fasta
+
+
+    Edit the data.conf file by adding the absolute paths of the input fastqs. This is where you can assign a new name to the sample output files. Output files will have A01 and A02 prefixes in this case:
+
+    [specimen_data] A01 = /path/to/sample1.fastq.gz A02 = /path/to/sample2.fastq.gz
+
+    Edit the settings.conf file to ensure the thresholds and filepaths are correct:
+
+    MSI defaults: multiplier = 2.0 
+   
+    msi_min_threshold = 0.2
+    msi_max_threshold = 0.2
 
 2. To test that everything is installed and all inputs are specified correctly, the -n flag can be used: 
 
@@ -136,11 +148,7 @@ The folllwing instructions will allow users to set up analysis for their custom 
 
   msi_intervals = /path/to/CUSTOM_MSI_INTERVALS
 
-6. Run analysis to generate a baseline file from MSI negative specimens.  Edit the settings.conf file to point to the absolute path of the MSI negative specimen BAMS and provide a name for the desired output folder: 
-
-  #Absolute path to input bam files for MSI negative specimens to be included in the baseline
-
-  datadir = /path/to/inputbamfiles 
+6. Run analysis to generate a baseline file from MSI negative specimens.  Edit the settings.conf file to point to the absolute path of the MSI negative specimen BAMS and provide a name for the desired output folder:
 
   #output folder name
 
