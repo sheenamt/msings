@@ -60,4 +60,3 @@ bash dev/install_varscan.sh ${VARSCAN_VERSION} $venv
 
 python setup.py install
 
-
