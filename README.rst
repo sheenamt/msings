@@ -85,27 +85,32 @@ Files specific for analysis of TCGA exome data are provided in the doc/ director
  * msi_bed 
  * msi_intervals 
 
-1. Edit the settings.conf to point to the absolute path to the reference fasta used to align this bam and  ensure the thresholds are correct:
+1. Edit the settings.conf to point to the absolute path to the reference fasta used to align this bam and  ensure the analytic parameters are correct:
 
     ref_fasta = /path/to/ref.fasta
     
-MSI defaults: multiplier = 2.0 
+ MSI default analytic parameters:
+ 
+    multiplier = 2.0 
+ * this is the number of standard deviations from the baseline that is required to call instability
    
     msi_min_threshold = 0.2
+ * this is the maximum fraction of unstable sites allowed to call a specimen MSI negative   
+
     msi_max_threshold = 0.2
+ * this is the minimum fraction of unstable sites allowed to call a specimen MSI positive
+
+ * If the fraction of unstable sites falls between the thresholds, the specimen is considered indeterminate.  (By default, no indeterminate calls are permitted) 
 
  2.   Edit the data.conf file by adding the absolute paths of the input bams. This is where you can assign a new name to the sample output files. Output files will have A01 and A02 prefixes in this case:
 
     [specimen_data] 
 
    A01 = /path/to/sample1.final.bam
+
    A02 = /path/to/sample2.final.bam
 
-
-
-    
-
-2. To test that everything is installed and all inputs are specified correctly, the -n flag can be used: 
+3. To test that everything is installed and all inputs are specified correctly, the -n flag can be used: 
 
   $ scons -n
   
@@ -115,7 +120,7 @@ MSI defaults: multiplier = 2.0
 
   scons: done building targets.
 
-3. Run the analysis script for the batch of samples. Output will be in the output directory specified in the settings.conf file, 'output' by default
+4. Run the analysis script for the batch of samples. Output will be in the output directory specified in the settings.conf file, 'output' by default
 
  $ scons 
 
