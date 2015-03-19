@@ -85,24 +85,24 @@ Files specific for analysis of TCGA exome data are provided in the doc/ director
  * msi_bed 
  * msi_intervals 
 
-1. Edit the settings.conf to point to the absolute path to the reference fasta used to align this bam and  ensure the analytic parameters are correct:
+1. Edit the settings.conf to point to the absolute path to the reference fasta used to align this bam:
 
     ref_fasta = /path/to/ref.fasta
     
- MSI default analytic parameters:
+2. Optional - Edit the settings.conf to MSI default analytic parameters:
  
     multiplier = 2.0 
- * this is the number of standard deviations from the baseline that is required to call instability
+ * "multiplier" is the number of standard deviations from the baseline that is required to call instability
    
     msi_min_threshold = 0.2
- * this is the maximum fraction of unstable sites allowed to call a specimen MSI negative   
+ * "msi_min_threshold" is the maximum fraction of unstable sites allowed to call a specimen MSI negative   
 
     msi_max_threshold = 0.2
- * this is the minimum fraction of unstable sites allowed to call a specimen MSI positive
+ * "msi_max_threshold" is the minimum fraction of unstable sites allowed to call a specimen MSI positive
 
  * If the fraction of unstable sites falls between the thresholds, the specimen is considered indeterminate.  (By default, no indeterminate calls are permitted) 
 
- 2.   Edit the data.conf file by adding the absolute paths of the input bams. This is where you can assign a new name to the sample output files. Output files will have A01 and A02 prefixes in this case:
+3.   Edit the data.conf file by adding the absolute paths of the input bams. This is where you can assign a new name to the sample output files. Output files will have A01 and A02 prefixes in this case:
 
     [specimen_data] 
 
@@ -110,7 +110,7 @@ Files specific for analysis of TCGA exome data are provided in the doc/ director
 
    A02 = /path/to/sample2.final.bam
 
-3. To test that everything is installed and all inputs are specified correctly, the -n flag can be used: 
+4. To test that everything is installed and all inputs are specified correctly, the -n flag can be used: 
 
   $ scons -n
   
@@ -120,7 +120,7 @@ Files specific for analysis of TCGA exome data are provided in the doc/ director
 
   scons: done building targets.
 
-4. Run the analysis script for the batch of samples. Output will be in the output directory specified in the settings.conf file, 'output' by default
+5. Run the analysis script for the batch of samples. Output will be in the output directory specified in the settings.conf file, 'output' by default
 
  $ scons 
 
@@ -161,7 +161,6 @@ The folllwing instructions will allow users to set up analysis for their custom 
 
   output = /path/to/my_output
 
-
 7. Now test the setup for the creation of the msi-calls files, and run the program for each MSI negative specimen to include in the baseline file creation:
 
  $ scons -n msi-calls
@@ -184,9 +183,9 @@ NOTE: This process only need to be done once per assay/target data set. Files ma
 
  msi_baseline = /path/to/CUSTOM_MSI_BASELINE
  
-Once the settings.conf file is updated for the new custom files, execution is the same as for Exome / TCGA data sets (above).  
+Also update the settings.conf file as described in step 1 and [optionally] step 2 for Exome /TCGA data.
 
-10. To test that everything is installed and all inputs are specified correctly, the -n flag can be used: 
+10. Once the settings.conf file is updated for the new custom files, execution is the same as for Exome / TCGA data sets (above).  To test that everything is installed and all inputs are specified correctly, the -n flag can be used: 
 
   $ scons -n
   
