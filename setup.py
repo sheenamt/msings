@@ -23,9 +23,16 @@ params = {'author': 'Sheena Scroggins',
           'scripts': ['msi'],
           'version': __version__,
           'package_data': {'msings': [join('data',f) for f in ['sha','ver']]},
+          'setup_requires':['numpy'],
           'install_requires': [
-              'numpy==1.9.2',
-              'natsort==3.5.2'
+              'numpy',
+              'natsort',
+              'bioscons',
+              'xlwt',
+              'xlrd',
+          ],
+          'dependency_links' : [
+              "git+ssh://git@bitbucket.org/uwlabmed/munge.git@master#egg=munge",
           ]
           }
 
