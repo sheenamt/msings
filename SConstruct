@@ -94,7 +94,6 @@ except IndexError:
 
 outputs = []
 samples = []  # Sample Directories
-varscan=os.path.join(venv, 'bin/VarScan.v2.3.7.jar')
 
 for pfx in data.keys():
     env = parent_env.Clone()
@@ -118,11 +117,12 @@ for pfx in data.keys():
                 '${SOURCES[0]} '
                 '> ${TARGET} ')
     )
+    Alias('mpileup', mpileup)
 #######
 ##MSI##
 #######
     # Call MSI with help of varscan readcounts
-    msi_output, log = e.Command(
+    msi_output, log = env.Command(
         target=['$pfxout/${specimen}.msi_output',
                 '$logs/readcounts'],
         source=[mpileup,
@@ -136,14 +136,14 @@ for pfx in data.keys():
                 '2> ${TARGETS[1]} ')
     )
     Alias('readcounts', msi_output)
-    msi_calls = e.Command(
+    msi_calls = env.Command(
         target='$pfxout/${specimen}.msi.txt',
         source=[msi_output,
                 '$msi_bed'],
         action=('msi analyzer ${SOURCES[0]} ${SOURCES[1]} -o $TARGET')
     )
     Alias('msi_calls', msi_calls)
-    msi_analysis = e.Command(
+    msi_analysis = env.Command(
         target='$pfxout/${specimen}.MSI_Analysis.txt',
         source='$msi_baseline',
         action=('msi count_msi_samples '
@@ -153,7 +153,7 @@ for pfx in data.keys():
                 '-t $msi_min_threshold $msi_max_threshold '
                 '-o $TARGET ')
     )
-    e.Depends(msi_analysis, msi_calls)
+    env.Depends(msi_analysis, msi_calls)
     Alias('msi_analysis', msi_analysis)
 
     outputs.append(msi_analysis)
