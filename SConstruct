@@ -38,10 +38,10 @@ for k, v in config.items('msi_info'):
     scons_vars.Add(k, default=v)
 
 data = {}
-for key, fastq in config.items('specimen_data'):
-    data[key] = fastq.split(',')
+for key, bam in config.items('specimen_data'):
+    data[key] = bam.split(',')
     assert(len(data[key]) == 1)
-    assert(path.exists(fastq))
+    assert(path.exists(bam))
 
 # either we're already operating in an activated virtualenv (which we can activate again without
 # causing harm) or use the one defined in settings.conf
@@ -100,10 +100,7 @@ for pfx in data.keys():
     env['specimen'] = pfx
     env['pfxout'] = path.join(path.abspath(env['output']),pfx)
     env['logs'] = path.join(env['pfxout'], 'logs')
-
-    # Ensure order is R1 followed by R2
-    seqs = sorted(data[pfx])
-    # create a subdirectory for this specimen
+    seqs = data[pfx]
 
     # SNP and INDEL calling through VARSCAN
     mpileup= env.Command(

@@ -131,6 +131,8 @@ Files specific for analysis of TCGA exome data are provided in the doc/ director
  * msi_bed 
  * msi_intervals 
 
+NOTE: msi_baseline and msi_bed file must have the same loci ( ie, there are no loci in the bed file that are absent in the baseline file created in step 8 below)
+
 The folllwing instructions will allow users to set up analysis for their custom targets, to generate a custom baseline for those targets, and to run supsequent analysis.
 
 1. Before you begin creating custom files, acivate the virtualenv to make use of installed programs:
@@ -173,7 +175,8 @@ The folllwing instructions will allow users to set up analysis for their custom 
 
  $ msi create_baseline /path/to/my_output -o /path/to/CUSTOM_MSI_BASELINE
 
-NOTE: This process only need to be done once per assay/target data set. Files may be saved and re-used for subsequent analyses. 
+
+NOTE: Now that the baseline file has been created, edit the msi_bed file to ensure the same loci are present in both. Loci are excluded from the baseline file if the number of samples are insufficient to calculate statistics. This process only need to be done once per assay/target data set. Files may be saved and re-used for subsequent analyses. 
 
 9. Now we update the settings.conf to point to all the new custom files:
 
