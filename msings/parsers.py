@@ -26,7 +26,7 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
     #Grab the MSI files
     files = ifilter(filters.msi_file_finder,files) 
     files=sorted(files)    
-    
+
     #Grab the MSI Control info
     control_info=csv.DictReader(control_file, delimiter='\t')
     control_info=sorted(control_info, key=itemgetter('Position'))
