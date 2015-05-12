@@ -61,8 +61,8 @@ def action(args):
             reader = sorted(reader, key=itemgetter('Position'))
             for k, g in groupby(reader, key=itemgetter('Position')):
                 for row in g:
-                    if int(row['Avgerage_Depth']) >= 30:
-                        control[row['Position']].append(int(row['Number_Peaks']))
+                    if int(row['Average_Depth']) >= 30:
+                        control[row['Position']].append(int(row['Number_of_Peaks']))
     header = ['Position', 'Standard_Deviation', 'Average', 'Count']
     writer = csv.writer(args.outfile, quoting=csv.QUOTE_MINIMAL, delimiter='\t')
     writer.writerow(header)

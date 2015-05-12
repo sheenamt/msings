@@ -38,10 +38,10 @@ for k, v in config.items('msi_info'):
     scons_vars.Add(k, default=v)
 
 data = {}
-for key, fastq in config.items('specimen_data'):
-    data[key] = fastq.split(',')
+for key, bam in config.items('specimen_data'):
+    data[key] = bam.split(',')
     assert(len(data[key]) == 1)
-    assert(path.exists(fastq))
+    assert(path.exists(bam))
 
 # either we're already operating in an activated virtualenv (which we can activate again without
 # causing harm) or use the one defined in settings.conf
@@ -94,19 +94,13 @@ except IndexError:
 
 outputs = []
 samples = []  # Sample Directories
-varscan=os.path.join(venv, 'bin/VarScan.v2.3.7.jar')
 
 for pfx in data.keys():
     env = parent_env.Clone()
     env['specimen'] = pfx
-    print "pfx:", pfx
     env['pfxout'] = path.join(path.abspath(env['output']),pfx)
-    env['log'] = path.join(env['pfxout'], 'log')
-
-    # Ensure order is R1 followed by R2
-    seqs = sorted(data[pfx])
-    # create a subdirectory for this specimen
-    env['ctrlpath'] = env.subst('$output/$baseline_control')
+    env['logs'] = path.join(env['pfxout'], 'logs')
+    seqs = data[pfx]
 
     # SNP and INDEL calling through VARSCAN
     mpileup= env.Command(
@@ -120,12 +114,17 @@ for pfx in data.keys():
                 '${SOURCES[0]} '
                 '> ${TARGET} ')
     )
+    Alias('mpileup', mpileup)
+#######
+##MSI##
+#######
+    # Call MSI with help of varscan readcounts
     msi_output, log = env.Command(
         target=['$pfxout/${specimen}.msi_output',
-                '$log/readcounts'],
+                '$logs/readcounts'],
         source=[mpileup,
                 '$msi_intervals',
-                varscan],
+                '$varscan'],
         action=('java -Xmx4g -jar ${SOURCES[2]} readcounts '
                 ' ${SOURCES[0]} '
                 '--variants-file ${SOURCES[1]} '
@@ -141,20 +140,19 @@ for pfx in data.keys():
         action=('msi analyzer ${SOURCES[0]} ${SOURCES[1]} -o $TARGET')
     )
     Alias('msi_calls', msi_calls)
-    baseline_control = '{}/{}.msi.txt'.format(env['ctrlpath'],env['baseline_control'])
     msi_analysis = env.Command(
         target='$pfxout/${specimen}.MSI_Analysis.txt',
-        source=msi_calls,
+        source='$msi_baseline',
         action=('msi count_msi_samples '
-                '$ctrlpath/${baseline_control}.msi.txt '
                 '$SOURCE '
+                '$pfxout '
                 '-m $multiplier '
                 '-t $msi_min_threshold $msi_max_threshold '
                 '-o $TARGET ')
     )
-    if not pfx == env['baseline_control']:
-        env.Depends(msi_analysis, baseline_control)
+    env.Depends(msi_analysis, msi_calls)
     Alias('msi_analysis', msi_analysis)
+
     outputs.append(msi_analysis)
     samples.append(env.subst('$pfxout')) # Add sample directories to sample lis
     

@@ -26,7 +26,7 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
     #Grab the MSI files
     files = ifilter(filters.msi_file_finder,files) 
     files=sorted(files)    
-    
+
     #Grab the MSI Control info
     control_info=csv.DictReader(control_file, delimiter='\t')
     control_info=sorted(control_info, key=itemgetter('Position'))
@@ -83,12 +83,14 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
         specimens[msi][pfx]=msi_loci
         try:
             specimens[score][pfx]="{0:.4f}".format(float(msi_loci)/total_loci)
-            if min_thres < float(specimens[score][pfx]) < max_thres:
-                specimens[status][pfx]="IND"
-            elif float(specimens[score][pfx]) >= max_thres:
+            #POS if above or equal to max threshold
+            if float(specimens[score][pfx]) >= max_thres:
                 specimens[status][pfx]="POS"
             elif float(specimens[score][pfx]) < min_thres:
                 specimens[status][pfx]="NEG"
+            # If the score is between thresholds, its indeterminate
+            elif min_thres < float(specimens[score][pfx]) < max_thres:
+                specimens[status][pfx]="IND"
         except ZeroDivisionError:
             specimens[status][pfx]="NEG"
     fieldnames = variant_keys + list(prefixes) 
