@@ -64,7 +64,7 @@ def action(args):
                 for row in g:
                     if int(row['Average_Depth']) >= 30:
                         control[row['Position']].append(int(row['Number_of_Peaks']))
-    header = ['Position', 'Standard_Deviation', 'Average_Depth', 'Count']
+    header = ['Position', 'Standard_Deviation', 'Average', 'Count']
     writer = csv.writer(args.outfile, quoting=csv.QUOTE_MINIMAL, delimiter='\t')
     writer.writerow(header)
     for k, v in natsort.natsorted(control.items()):
