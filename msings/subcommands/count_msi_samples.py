@@ -60,7 +60,6 @@ def action(args):
     writer = csv.DictWriter(args.outfile, fieldnames = fieldnames,  extrasaction = 'ignore', delimiter = '\t')
     writer.writeheader()
     for position in natsort.natsorted(specimens.keys(), reverse=True):
-        print position
         d = {k:v for k,v in zip(variant_keys,position)}  
         d.update({pfx:specimens[position].get(pfx) for pfx in prefixes})  
         writer.writerow(d)
