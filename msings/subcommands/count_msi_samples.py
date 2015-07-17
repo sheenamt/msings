@@ -11,6 +11,7 @@ import csv
 import sys
 import argparse
 import re
+import natsort
 
 from collections import defaultdict, namedtuple
 from itertools import groupby, ifilter
@@ -58,8 +59,8 @@ def action(args):
 
     writer = csv.DictWriter(args.outfile, fieldnames = fieldnames,  extrasaction = 'ignore', delimiter = '\t')
     writer.writeheader()
-    #for position in sorted(specimens.keys(), reverse=True):
-    for position in sorted(specimens.keys(), reverse=True):
+    for position in natsort.natsorted(specimens.keys(), reverse=True):
+        print position
         d = {k:v for k,v in zip(variant_keys,position)}  
         d.update({pfx:specimens[position].get(pfx) for pfx in prefixes})  
         writer.writerow(d)

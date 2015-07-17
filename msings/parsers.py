@@ -6,6 +6,7 @@ import os
 import csv
 import sys
 import copy
+import natsort
 
 from itertools import count, groupby, chain, ifilter , izip_longest
 from operator import itemgetter
@@ -29,7 +30,7 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
 
     #Grab the MSI Control info
     control_info=csv.DictReader(control_file, delimiter='\t')
-    control_info=sorted(control_info, key=itemgetter('Position'))
+    control_info=natsort.natsorted(control_info, key=itemgetter('Position'))
     control_info=[d for d in control_info]
 
     variant_keys = ['Position',]
@@ -42,7 +43,7 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
         prefixes.append(mini_pfx)
         with open(os.path.join(pth.dir, pth.fname)) as fname:
             reader = csv.DictReader(fname, delimiter='\t')
-            sample_msi = sorted(reader, key=itemgetter('Position'))
+            sample_msi = natsort.natsorted(reader, key=itemgetter('Position'))
             for key, group in groupby(sample_msi, key=itemgetter('Position')):
                 control_row=[d for d in control_info if d['Position']==key]
                 variant = tuple(control_row[0][k] for k in variant_keys)    
