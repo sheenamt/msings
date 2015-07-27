@@ -16,6 +16,7 @@ Dependencies:
 
 * Tested on Ubuntu 12.04
 * Python 2.7.x
+* scons 
 * git
 * Installed in virtualenv:
 
@@ -133,9 +134,9 @@ Files specific for analysis of TCGA exome data are provided in the doc/ director
 
 NOTE: msi_baseline and msi_bed file must have the same loci ( ie, there are no loci in the bed file that are absent in the baseline file created in step 8 below)
 
-The folllwing instructions will allow users to set up analysis for their custom targets, to generate a custom baseline for those targets, and to run supsequent analysis.
+The following instructions will allow users to set up analysis for their custom targets, to generate a custom baseline for those targets, and to run subsequent analysis.
 
-1. Before you begin creating custom files, acivate the virtualenv to make use of installed programs:
+1. Before you begin creating custom files, activate the virtualenv to make use of installed programs:
   
  $ source msings-env/bin/activate
 
@@ -157,7 +158,12 @@ The folllwing instructions will allow users to set up analysis for their custom 
 
   msi_intervals = /path/to/CUSTOM_MSI_INTERVALS
 
-6. Run analysis to generate a baseline file from MSI negative specimens.  Edit the settings.conf file to point to the absolute path of the MSI negative specimen BAMS and provide a name for the desired output folder:
+6. Run analysis to generate a baseline file from MSI negative specimens.  Edit the data.conf file to point to the absolute path of the MSI negative specimen BAMS and provide a name for the desired output folder:
+  [specimen_data] 
+
+   A01 = /path/to/sample1.final.bam
+
+   A02 = /path/to/sample2.final.bam
 
   #output folder name
 
