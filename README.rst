@@ -62,9 +62,13 @@ Required Input files:
 
 5. msi_intervals : MSI interval file (see example under "doc/mSINGS_TCGA.intervals")  - file for internal program use.  User makes this using msi formatter script.
 
-6. settings.conf : file specifying absolute paths to above files, thresholds for MSI status calling, and control name.
+6. settings.conf : file specifying absolute paths to above files, thresholds for MSI status calling, and control name. Can be specified at the command prompt with:
 
-7. data.conf : file specifying absolute paths to bam files to be processed. 
+   $ scons settings=/path/to/settings.conf
+
+7. data.conf : file specifying absolute paths to bam files to be processed. Can be specified at the command prompt with:
+
+   $ scons data=/path/to/data.conf
 
 Please note that both your reference genome and bed files MUST follow the convention that chromosomes are numbered numerically or with "X" or "Y" - other names are not supported.
 
@@ -92,24 +96,24 @@ Files specific for analysis of TCGA exome data are provided in the doc/ director
     
 2. Optional - Edit the settings.conf to MSI default analytic parameters:
  
-    multiplier = 2.0 
- * "multiplier" is the number of standard deviations from the baseline that is required to call instability
+* multiplier = 2.0 
+    "multiplier" is the number of standard deviations from the baseline that is required to call instability
    
-    msi_min_threshold = 0.2
- * "msi_min_threshold" is the maximum fraction of unstable sites allowed to call a specimen MSI negative   
+* msi_min_threshold = 0.2
+    "msi_min_threshold" is the maximum fraction of unstable sites allowed to call a specimen MSI negative   
 
-    msi_max_threshold = 0.2
- * "msi_max_threshold" is the minimum fraction of unstable sites allowed to call a specimen MSI positive
+* msi_max_threshold = 0.2
+    "msi_max_threshold" is the minimum fraction of unstable sites allowed to call a specimen MSI positive
 
- * If the fraction of unstable sites falls between the thresholds, the specimen is considered indeterminate.  (By default, no indeterminate calls are permitted) 
+* If the fraction of unstable sites falls between the thresholds, the specimen is considered indeterminate.  (By default, no indeterminate calls are permitted) 
 
 3.   Edit the data.conf file by adding the absolute paths of the input bams. This is where you can assign a new name to the sample output files. Output files will have A01 and A02 prefixes in this case:
 
     [specimen_data] 
 
-   A01 = /path/to/sample1.final.bam
+    A01 = /path/to/sample1.final.bam
 
-   A02 = /path/to/sample2.final.bam
+    A02 = /path/to/sample2.final.bam
 
 4. To test that everything is installed and all inputs are specified correctly, the -n flag can be used: 
 
@@ -121,9 +125,9 @@ Files specific for analysis of TCGA exome data are provided in the doc/ director
 
   scons: done building targets.
 
-5. Run the analysis script for the batch of samples. Output will be in the output directory specified in the settings.conf file, 'output' by default
+5. Run the analysis script for the batch of samples. Output will be in the output directory specified in the settings.conf file, 'output' by default, unless specified at the command prompt
 
- $ scons 
+ $ scons output=name_of_output_folder
 
 Execution for custom data sets:
 -------------------
@@ -169,13 +173,13 @@ The following instructions will allow users to set up analysis for their custom 
 
   output = /path/to/my_output
 
-7. Now test the setup for the creation of the msi-calls files, and run the program for each MSI negative specimen to include in the baseline file creation:
+7. Now test the setup for the creation of the msi_calls files, and run the program for each MSI negative specimen to include in the baseline file creation:
 
- $ scons -n msi-calls
+ $ scons -n msi_calls
 
  If that produces the expected "scons: done building targets" message, proceed: 
 
- $ scons msi-calls
+ $ scons msi_calls
 
 8. Use these raw data to produce the the MSI_BASELINE file from MSI negative specimens
 
@@ -207,6 +211,10 @@ Also update the settings.conf file as described in step 1 and [optionally] step 
 11. Run the analysis script for the batch of samples. Output will be in the output directory specified in the settings.conf file, 'output' by default
 
  $ scons 
+
+12. To specify settings.conf, data.conf and output directory to be something other than default:
+
+    $ scons settings=/path/to/settings.conf data=/path/to/data.conf output=name_of_output_folder 
  
 Tests:
 ^^^^^^

@@ -17,20 +17,31 @@ import ConfigParser
 from SCons.Script import (Decider, Variables, Depends, Alias, Help,
                           Flatten, AllowSubstExceptions, Copy)
 
-
 Decider('MD5-timestamp')
 
-SETTINGS = 'settings.conf'
-DATA = 'data.conf'
-if not path.exists(SETTINGS):
-    sys.exit("Cannot find configuration file '{}'".format(SETTINGS))
-if not path.exists(DATA):
-    sys.exit("Cannot find configuration file '{}'".format(DATA))
+# declare variables for the environment
+vars = Variables(None, ARGUMENTS)
+vars.Add(PathVariable('settings', 'configuration file', 'settings.conf'))
+vars.Add(PathVariable('data', 'data file', 'data.conf'))
+vars.Add(PathVariable('output', 'Path to output directory',
+                      'output', PathVariable.PathIsDirCreate))
+
+# Provides access to options prior to instantiation of env object
+# below; it's better to access variables through the env object.
+varargs = dict({opt.key: opt.default for opt in vars.options}, **vars.args)
+settings = varargs['settings']
+data = varargs['data']
+if not path.exists(settings):
+    print 'Either create "settings.conf" or use "scons settings=settings-example.conf"'
+    sys.exit(1)
+if not path.exists(data):
+    print 'Either create "data.conf" or use "scons data=data.conf"'
+    sys.exit(1)
 
 config = SafeConfigParser(allow_no_value=True)
 config.optionxform = str # Make sure keys are case sensitive
-config.read(SETTINGS)
-config.read(DATA)
+config.read(settings)
+config.read(data)
 
 # Prepare variables and environment
 scons_vars = Variables()
