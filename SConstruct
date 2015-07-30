@@ -89,8 +89,7 @@ PERL5LIB = [path.join(venv, 'bin'),
 scons_env = dict(os.environ,PATH=':'.join(PATH), PERL5LIB=':'.join(PERL5LIB))
 #    THREADS_ALLOC=str(nproc))
 
-from bioscons.slurm import SlurmEnvironment
-parent_env = SlurmEnvironment(
+parent_env = Environment(
     ENV = scons_env,
     variables= scons_vars,
     SHELL='bash',
