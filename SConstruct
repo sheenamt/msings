@@ -17,20 +17,35 @@ import ConfigParser
 from SCons.Script import (Decider, Variables, Depends, Alias, Help,
                           Flatten, AllowSubstExceptions, Copy)
 
-
 Decider('MD5-timestamp')
 
-SETTINGS = 'settings.conf'
-DATA = 'data.conf'
-if not path.exists(SETTINGS):
-    sys.exit("Cannot find configuration file '{}'".format(SETTINGS))
-if not path.exists(DATA):
-    sys.exit("Cannot find configuration file '{}'".format(DATA))
+# declare variables for the environment
+vars = Variables(None, ARGUMENTS)
+vars.Add(PathVariable('settings', 'configuration file', 'settings.conf'))
+vars.Add(PathVariable('data', 'data file', 'data.conf'))
+vars.Add(PathVariable('output', 'Path to output directory',
+                      'output', PathVariable.PathIsDirCreate))
+
+# Provides access to options prior to instantiation of env object
+# below; it's better to access variables through the env object.
+varargs = dict({opt.key: opt.default for opt in vars.options}, **vars.args)
+
+# get default locations of input file for pipeline programs from settings.conf
+settings = varargs['settings']
+if not path.exists(settings):
+    print 'Either create "settings.conf" or use "scons settings=settings-example.conf"'
+    sys.exit(1)
+
+# get the absolute paths to each input file from the data.conf
+data = varargs['data']
+if not path.exists(data):
+    print 'Either create "data.conf" or use "scons data=data.conf"'
+    sys.exit(1)
 
 config = SafeConfigParser(allow_no_value=True)
 config.optionxform = str # Make sure keys are case sensitive
-config.read(SETTINGS)
-config.read(DATA)
+config.read(settings)
+config.read(data)
 
 # Prepare variables and environment
 scons_vars = Variables()
@@ -70,22 +85,15 @@ PATH = [
 # Prefer the local venv for importing modules
 sys.path.insert(0, os.path.join(venv, 'lib', 'python2.7', 'site-packages'))
 
-PERL5LIB = [path.join(venv, 'bin'),
-            path.join(venv, 'lib'),
-            path.join(venv, 'lib', 'perl5')]
-
-#nproc = int(_params.defaults().get('nproc', 1))
-scons_env = dict(os.environ,PATH=':'.join(PATH), PERL5LIB=':'.join(PERL5LIB))
-#    THREADS_ALLOC=str(nproc))
-
-from bioscons.slurm import SlurmEnvironment
-parent_env = SlurmEnvironment(
+scons_env = dict(os.environ, PATH=':'.join(PATH))
+parent_env = Environment(
     ENV = scons_env,
     variables= scons_vars,
     SHELL='bash',
     time=False)
 
-# Run folder is Project_<Run>
+# Run folder is Date_Machine-run_Project
+# 150101_HA0012_OncoPlex92
 try:
     seq_run = Dir('.').abspath.split('_')[2]
 #Unless this is a validation run, then use the name of the project
