@@ -23,7 +23,7 @@ from msings.utils import walker
 
 def build_parser(parser):
 
-    parser.add_argument('path',
+    parser.add_argument('path', 
                         help='Path to analysis files')
     parser.add_argument('-o', '--outfile', type=argparse.FileType('w'),
                         default=sys.stdout,
@@ -35,7 +35,7 @@ def msi_file_finder(pth):
     Return True if pth represents an analysis file.
     """
     return bool(re.search(r'.msi.txt', pth.fname))
-
+    
 
 Path = namedtuple('Path', ['dir','fname'])
 
@@ -44,7 +44,6 @@ def walker(dir):
     (path, dirs, files) return a named tuple with attributes (dir,
     fname) for each file name in `files`.
     """
-
     for (pth, dirs, files) in os.walk(dir):
         for fname in files:
             yield Path(pth, fname)
@@ -55,9 +54,10 @@ def action(args):
     files = ifilter(msi_file_finder, walker(args.path))
     #sort the files so that the output in the workbook is sorted
     files = sorted(files)
+    
     count = 0
     for pth in files:
-        with open(os.path.join(args.path, pth.fname)) as fname:
+        with open(os.path.join(pth.dir, pth.fname)) as fname:
             reader = csv.DictReader(fname, delimiter='\t')
             reader = sorted(reader, key=itemgetter('Position'))
             for k, g in groupby(reader, key=itemgetter('Position')):
