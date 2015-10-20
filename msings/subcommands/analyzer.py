@@ -182,7 +182,6 @@ def calc_summary_stats(msi_sites, cutoff):
                               'Mutant_Tally':info['mutant_tally'],
                               'Number_of_Peaks':num_peaks,
                               'IndelLength:AlleleFraction:Reads':peak_list}
-
     return output
     
 
@@ -223,8 +222,6 @@ def action(args):
     output.update(calc_summary_stats(msi_sites, cutoff))
 
     fieldnames=['Position','Name','Average_Depth','Number_of_Peaks','Standard_Deviation','IndelLength:AlleleFraction:Reads']
-    #fieldnames=['Position','Name','Average_Depth','Total_Depth','Total_Sites','Wildtype_Depth','Wildtype_Fraction','Mutant_Tally','Number_of_Peaks','Standard_Deviation','Peak_Distribution']
-    #pprint.pprint(output)
 
     writer = csv.DictWriter(args.outfile, fieldnames = fieldnames,  extrasaction = 'ignore', delimiter = '\t')
     writer.writeheader()
