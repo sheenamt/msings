@@ -11,7 +11,7 @@ from itertools import count, groupby, chain, ifilter , izip_longest
 from operator import itemgetter
 
 from msings import filters
-from munging.utils import walker, munge_pfx
+from msings.utils import munge_pfx
 
 """Each function parses a group of sample files for desired information,
 grouping based on the variant_keys list,

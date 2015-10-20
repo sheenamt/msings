@@ -14,7 +14,7 @@ import csv
 from operator import itemgetter
 from itertools import ifilter
 from collections import namedtuple, defaultdict
-from msings.utils import Path, walker
+from msings.utils import walker
 from msings import parsers
 
 
