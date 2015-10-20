@@ -11,7 +11,7 @@ from itertools import count, groupby, chain, ifilter , izip_longest
 from operator import itemgetter
 
 from msings import filters
-from msings.utils import walker, munge_pfx
+from munging.utils import walker, munge_pfx
 
 """Each function parses a group of sample files for desired information,
 grouping based on the variant_keys list,
@@ -26,7 +26,7 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
     #Grab the MSI files
     files = ifilter(filters.msi_file_finder,files) 
     files=sorted(files)    
-    
+
     #Grab the MSI Control info
     control_info=csv.DictReader(control_file, delimiter='\t')
     control_info=sorted(control_info, key=itemgetter('Position'))
@@ -48,7 +48,7 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
                 variant = tuple(control_row[0][k] for k in variant_keys)    
                 for sample_info in group:
                     if int(sample_info['Average_Depth']) >= 30:
-                        value = float(control_row[0]['Average_Depth']) + (multiplier * float(control_row[0]['Standard_Deviation']))
+                        value = float(control_row[0]['Average']) + (multiplier * float(control_row[0]['Standard_Deviation']))
                         if int(sample_info['Number_of_Peaks']) >= value:
                             new_info = 1
                         else:
