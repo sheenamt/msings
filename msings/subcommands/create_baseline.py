@@ -11,6 +11,7 @@ import csv
 import sys
 import argparse
 import re
+import natsort
 
 from collections import defaultdict, namedtuple
 from itertools import groupby, ifilter
@@ -61,12 +62,12 @@ def action(args):
             reader = sorted(reader, key=itemgetter('Position'))
             for k, g in groupby(reader, key=itemgetter('Position')):
                 for row in g:
-                    if int(row['Avgerage_Depth']) >= 30:
-                        control[row['Position']].append(int(row['Number_Peaks']))
+                    if int(row['Average_Depth']) >= 30:
+                        control[row['Position']].append(int(row['Number_of_Peaks']))
     header = ['Position', 'Standard_Deviation', 'Average', 'Count']
     writer = csv.writer(args.outfile, quoting=csv.QUOTE_MINIMAL, delimiter='\t')
     writer.writerow(header)
-    for k, v in sorted(control.items()):
+    for k, v in natsort.natsorted(control.items()):
         count = len(v)
         a = array(v)
         std_d = a.std()
