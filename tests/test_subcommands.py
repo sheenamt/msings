@@ -72,7 +72,7 @@ OUTPUT={ '1:1-5': {'Average_Depth': 100,
                    'Name': 'NAME1',
                    'Number_of_Peaks': 2,
                    'IndelLength:AlleleFraction:Reads': '-1:0.1:10 0:0.9:90',
-                   'Standard_Deviation': 0.30000000000000004,
+                   'Standard_Deviation': '0.300000',
                    'Total_Depth': 500,
                    'Total_Sites': 5,
                    'Wildtype_Depth': 90,
@@ -82,7 +82,7 @@ OUTPUT={ '1:1-5': {'Average_Depth': 100,
                     'Name': 'NAME2',
                     'Number_of_Peaks': 3,
                     'IndelLength:AlleleFraction:Reads': '-3:1.4:140 -2:0:0 -1:0:0 0:0:0 1:1.4:140',
-                    'Standard_Deviation': 2.0,
+                    'Standard_Deviation': '2.000000',
                     'Total_Depth': 500,
                     'Total_Sites': 5,
                     'Wildtype_Depth': 0,
@@ -92,7 +92,7 @@ OUTPUT={ '1:1-5': {'Average_Depth': 100,
                    'Name': 'NAME3',
                    'Number_of_Peaks': 3,
                    'IndelLength:AlleleFraction:Reads': '-1:0.2:10 0:0:0 1:1.7:85',
-                   'Standard_Deviation': 0.61378440998371586,
+                   'Standard_Deviation': '0.613784',
                    'Total_Depth': 250,
                    'Total_Sites': 5,
                    'Wildtype_Depth': 0,
@@ -210,6 +210,7 @@ class TestAnalyzer(TestBase):
 
     def testCalcSTDPeaks(self):
         """Test the standard deviation calculations"""
+        peaks=['0:0.863414634146:354', '1:0.0402598525993:17', '-1:0.0855382887727:34', '-2:0.0132135895294:5']
+        stdev=analyzer.calc_std_peaks(peaks)
+        self.assertEqual(stdev, '0.410894')
 
-        pass
-        # def calc_std_peaks(peaks):

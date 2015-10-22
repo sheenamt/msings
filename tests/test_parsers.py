@@ -48,3 +48,4 @@ class TestParsers(TestBase):
         self.assertListEqual(sorted(prefixes),sorted(['0228T', '5437_NA12878', '6037_NA12878']))
         self.assertListEqual(sorted(fieldnames), sorted(['0228T', '5437_NA12878', '6037_NA12878', 'Position']))
         self.assertListEqual(variant_keys, ['Position'])
+        

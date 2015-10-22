@@ -6,6 +6,7 @@ import os
 import csv
 import sys
 import copy
+import natsort
 
 from itertools import count, groupby, chain, ifilter , izip_longest
 from operator import itemgetter
@@ -29,7 +30,7 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
 
     #Grab the MSI Control info
     control_info=csv.DictReader(control_file, delimiter='\t')
-    control_info=sorted(control_info, key=itemgetter('Position'))
+    control_info=natsort.natsorted(control_info, key=itemgetter('Position'))
     control_info=[d for d in control_info]
 
     variant_keys = ['Position',]
@@ -42,7 +43,7 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
         prefixes.append(mini_pfx)
         with open(os.path.join(pth.dir, pth.fname)) as fname:
             reader = csv.DictReader(fname, delimiter='\t')
-            sample_msi = sorted(reader, key=itemgetter('Position'))
+            sample_msi = natsort.natsorted(reader, key=itemgetter('Position'))
             for key, group in groupby(sample_msi, key=itemgetter('Position')):
                 control_row=[d for d in control_info if d['Position']==key]
                 variant = tuple(control_row[0][k] for k in variant_keys)    
@@ -61,11 +62,11 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
 
     #Parse the user defined thresholds:
     if len(threshold) == 1:
-        min_thres=threshold
-        max_thres=1
+        min_thres=float(threshold)
+        max_thres=float(threshold)
     elif len(threshold) == 2:
-        min_thres=min(threshold)
-        max_thres=max(threshold)
+        min_thres=float(min(threshold))
+        max_thres=float(max(threshold))
     else:
         sys.exit("Wrong number of -t thresholds given")
     for pfx in prefixes:    
@@ -83,12 +84,14 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
         specimens[msi][pfx]=msi_loci
         try:
             specimens[score][pfx]="{0:.4f}".format(float(msi_loci)/total_loci)
-            if min_thres < float(specimens[score][pfx]) < max_thres:
-                specimens[status][pfx]="IND"
-            elif float(specimens[score][pfx]) >= max_thres:
+            #POS if above or equal to max threshold
+            if float(specimens[score][pfx]) >= max_thres:
                 specimens[status][pfx]="POS"
             elif float(specimens[score][pfx]) < min_thres:
                 specimens[status][pfx]="NEG"
+            # If the score is between thresholds, its indeterminate
+            elif min_thres < float(specimens[score][pfx]) < max_thres:
+                specimens[status][pfx]="IND"
         except ZeroDivisionError:
             specimens[status][pfx]="NEG"
     fieldnames = variant_keys + list(prefixes) 
