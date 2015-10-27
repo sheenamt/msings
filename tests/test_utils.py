@@ -30,7 +30,7 @@ class TestUtils(TestBase):
                    'run': '60', 
                    'sample_id': '6037', 
                    'pfx': '6037_E05_OPXv4_NA12878_HA0201',
-                   'assay':'oncoplex',
+                   'assay':'OncoPlex',
                    'mini-pfx': '6037_NA12878'}
         
         test_info=munge_pfx('6037_E05_OPXv4_NA12878_HA0201')
