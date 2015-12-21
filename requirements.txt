@@ -1,6 +1,0 @@
-natsort
-bioscons
-xlwt
-xlrd
-numpy
-git+ssh://git@bitbucket.org/uwlabmed/munge.git@master#egg=munge
