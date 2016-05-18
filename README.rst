@@ -35,7 +35,7 @@ Development (developers only):
 ------------------------------
 The devel.sh script builds a local virtualenv and downloads test data (if run from UW):
 
->>> git clone git@bitbucket.org:uwlabmed/msings.git
+>>> git clone https://bitbucket.org/uwlabmed/msings.git
 >>> cd msings 
 >>> bash dev/devel.sh 
 
