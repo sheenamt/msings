@@ -79,9 +79,10 @@ def munge_pfx(pfx):
         elif re.search('OPX', pfx):
             pfx_info['assay']='OncoPlex'
     else:
-        print "pfx:", pfx
-        raise ValueError('Incorrect pfx given. Expected Plate_Well_Assay_<CONTROL>_MachinePlate.file-type.file-ext')
-
+        pfx_info={'mini-pfx':pfx,
+                  'pfx':pfx,
+                  'sample_id':pfx,
+                  'assay':'NA'}
 
     return pfx_info
 
