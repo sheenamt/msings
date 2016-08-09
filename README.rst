@@ -22,7 +22,7 @@ Dependencies:
 * scons 
 * git
 
-This pipeline is designed to be run inside its own virtualenv, specified in settings.conf. To create a new virtualenv, first navigate to the top level directory of the repo and run the install script, specifying a directory for the virtualenv if pwd-env isn't sufficient:
+Please ensure the dependencies are installed to the system. This pipeline is designed to be run inside its own virtualenv, specified in settings.conf. To create a new virtualenv, first navigate to the top level directory of the repo and run the install script, specifying a directory for the virtualenv if pwd-env isn't sufficient:
 
 >>> cd path/to/msings
 >>> bash dev/bootstrap.sh /different/virtual/path
