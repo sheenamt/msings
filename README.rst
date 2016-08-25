@@ -22,14 +22,28 @@ Dependencies:
 * scons 
 * git
 
-Please ensure the dependencies are installed to the system. This pipeline is designed to be run inside its own virtualenv, specified in settings.conf. To create a new virtualenv, first navigate to the top level directory of the repo and run the install script, specifying a directory for the virtualenv if pwd-env isn't sufficient:
+Installation:
+-------------
+Please ensure the dependencies are installed to the system. 
+This pipeline is designed to be run inside its own virtual environment (virtualenv), specified in settings.conf. The following commands will allow you to establish this virtualenv.
 
->>> cd path/to/msings
->>> bash dev/bootstrap.sh /different/virtual/path
+To install the software to a virtual environment in your current directory, run the following commands:
+
+>>> git clone https://bitbucket.org/uwlabmed/msings.git
+>>> cd msings
+>>> bash dev/bootstrap.sh
 
 To use the virtualenv, including the programs (varscan, samtools, msi), run:
 
 >>> source msings-env/bin/activate
+
+To install the software (including creating a virtualenv) to a path of your choosing, run the following commands:
+
+>>> git clone https://bitbucket.org/uwlabmed/msings.git
+>>> cd msings
+>>> bash dev/bootstrap.sh /desired/virtual/path
+
+NOTE:  Downloading the zipped file through this website will cause installation problems and is not supported. Please CLONE the repo. 
 
 Development (developers only):
 ------------------------------
@@ -43,7 +57,7 @@ If run outside of the UW network, it will not download test data.
 
 Required Input files:
 ----------------------
-1. bam file - sample of interest aligned against reference genome, provided in bam format. Index required. 
+1. bam file : sample of interest aligned against reference genome, provided in bam format. Index required. 
 
 2. ref_fasta : fasta file alignment was created with - in other words, your reference genome.  Must be indexed with bwa for use with samtools program (see below).  Please note that both your reference genome and bed files MUST follow the convention that chromosomes are numbered numerically or with "X" or "Y".  Other conventions (such as those bearing a "chr" prefix) are not supported.
 
