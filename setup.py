@@ -25,12 +25,12 @@ params = {'author': 'Sheena Scroggins',
           'package_data': {'msings': [join('data',f) for f in ['sha','ver']]},
           'setup_requires':['numpy'],
           'install_requires': [
-            'natsort==3.5.3',
-            'numpy==1.10.4',
-            'wsgiref==0.1.2',
-            'xlrd==0.9.4',
-            'xlwt==1.0.0',
-            'bioscons==0.8.1,'
+              'natsort==3.5.3',
+              'numpy==1.11.1',
+              'wsgiref==0.1.2',
+              'xlrd==0.9.4',
+              'xlwt==1.0.0',
+              'bioscons==0.8.1,'
 ],
           'dependency_links' : [
               "git+ssh://git@bitbucket.org/uwlabmed/munge.git@master#egg=munge",
