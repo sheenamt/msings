@@ -26,7 +26,6 @@ params = {'author': 'Sheena Scroggins',
           'setup_requires':['numpy'],
           'install_requires': [
               'natsort==3.5.3',
-              'numpy==1.11.1',
               'wsgiref==0.1.2',
               'xlrd==0.9.4',
               'xlwt==1.0.0',

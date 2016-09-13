@@ -58,5 +58,8 @@ bash dev/install_samtools.sh ${SAMTOOLS_VERSION} $venv
 # install VARSCAN_VERSION=v2.3.7
 bash dev/install_varscan.sh ${VARSCAN_VERSION} $venv
 
+pip install -U pip
+pip install -r requirements.txt
+
 python setup.py install
 
