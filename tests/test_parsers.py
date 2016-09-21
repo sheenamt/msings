@@ -45,7 +45,7 @@ class TestParsers(TestBase):
         threshold=[0.2, 0.9]
         chosen_parser='{}(files, control_info, specimens, prefixes, variant_keys, multiplier,threshold)'.format(analysis_type)    
         specimens, prefixes, fieldnames, variant_keys=eval(chosen_parser)  
-        self.assertListEqual(sorted(prefixes),sorted(['0228T', '5437_NA12878', '6037_NA12878']))
-        self.assertListEqual(sorted(fieldnames), sorted(['0228T', '5437_NA12878', '6037_NA12878', 'Position']))
+        self.assertListEqual(sorted(prefixes),sorted(['0228T_CON_OPXv4_INT', '5437_E05_OPXv4_NA12878_MA0013', '6037_E05_OPXv4_NA12878_HA0201']))
+        self.assertListEqual(sorted(fieldnames), sorted(['0228T_CON_OPXv4_INT', '5437_E05_OPXv4_NA12878_MA0013', '6037_E05_OPXv4_NA12878_HA0201', 'Position']))
         self.assertListEqual(variant_keys, ['Position'])
         

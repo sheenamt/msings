@@ -12,7 +12,6 @@ from itertools import count, groupby, chain, ifilter , izip_longest
 from operator import itemgetter
 
 from msings import filters
-from msings.utils import munge_pfx
 
 """Each function parses a group of sample files for desired information,
 grouping based on the variant_keys list,
@@ -35,12 +34,8 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
 
     variant_keys = ['Position',]
     for pth in files:
-        pfx = munge_pfx(pth.fname)
-        try:
-            mini_pfx=pfx['mini-pfx'] #if genetics format name
-        except TypeError:
-            mini_pfx=pfx[0] #otherwise its the filename
-        prefixes.append(mini_pfx)
+        pfx = pth.fname.strip('.msi.txt')
+        prefixes.append(pfx)
         with open(os.path.join(pth.dir, pth.fname)) as fname:
             reader = csv.DictReader(fname, delimiter='\t')
             sample_msi = natsort.natsorted(reader, key=itemgetter('Position'))
@@ -56,7 +51,7 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
                             new_info = 0
                     else:           
                         new_info = None
-                    specimens[variant][mini_pfx] = new_info
+                    specimens[variant][pfx] = new_info
     #Make copy of dictionary to iterate through
     info=copy.copy(specimens)
 

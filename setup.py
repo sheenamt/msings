@@ -31,9 +31,6 @@ params = {'author': 'Sheena Scroggins',
               'xlwt==1.0.0',
               'bioscons==0.8.1,'
 ],
-          'dependency_links' : [
-              "git+ssh://git@bitbucket.org/uwlabmed/munge.git@master#egg=munge",
-          ]
           }
 
 setup(**params)
