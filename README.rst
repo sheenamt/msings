@@ -137,7 +137,7 @@ Files specific for analysis of TCGA exome data are provided in the doc/ director
 
 NOTE: msi_baseline and msi_bed file must have the same loci ( ie, there are no loci in the bed file that are absent in the baseline file created in step 8 below)
 
-The following instructions will allow users to set up analysis for their custom targets, to generate a custom baseline for those targets, and to run subsequent analysis.
+The following instructions will allow users to set up analysis for their custom targets, to generate a custom baseline for those targets, and to run subsequent analysis.  Recommendations for design of custom assays and custom targets are provided in the Recommendations_for_custom_assays.txt file packaged with the repository.
 
 1. Before you begin creating custom files, activate the virtualenv to make use of installed programs:
   
