@@ -55,6 +55,12 @@ The devel.sh script builds a local virtualenv and downloads test data (if run fr
 
 If run outside of the UW network, it will not download test data. 
 
+Bash version:
+-------------
+If for some reason, you cannot install scons, a bash script is available for running the mSINGS pipeline manually. 
+Please see the 'run_msings.sh' script for further details.
+Note, installation as outlined above via the bootstrap.sh script is still required. 
+
 Required Input files:
 ----------------------
 1. bam file : sample of interest aligned against reference genome, provided in bam format. Index required. 
