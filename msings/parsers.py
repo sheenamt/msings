@@ -34,7 +34,7 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
 
     variant_keys = ['Position',]
     for pth in files:
-        pfx = pth.fname.strip('.msi.txt')
+        pfx = pth.fname.replace('.msi.txt','')
         prefixes.append(pfx)
         with open(os.path.join(pth.dir, pth.fname)) as fname:
             reader = csv.DictReader(fname, delimiter='\t')
