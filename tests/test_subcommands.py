@@ -6,7 +6,6 @@ import os
 from os import path
 import unittest
 import logging
-import pprint
 import csv
 import sys
 import json
@@ -71,7 +70,7 @@ OUTPUT={ '1:1-5': {'Average_Depth': 100,
                    'Mutant_Tally': 1,
                    'Name': 'NAME1',
                    'Number_of_Peaks': 2,
-                   'IndelLength:AlleleFraction:Reads': '-1:0.1:10 0:0.9:90',
+                   'IndelLength:AlleleFraction:Reads': '-1:1.0:10 0:0.9:90',
                    'Standard_Deviation': '0.300000',
                    'Total_Depth': 500,
                    'Total_Sites': 5,
@@ -81,7 +80,7 @@ OUTPUT={ '1:1-5': {'Average_Depth': 100,
                     'Mutant_Tally': 6,
                     'Name': 'NAME2',
                     'Number_of_Peaks': 3,
-                    'IndelLength:AlleleFraction:Reads': '-3:1.4:140 -2:0:0 -1:0:0 0:0:0 1:1.4:140',
+                    'IndelLength:AlleleFraction:Reads': '-3:1.0:140 -2:0:0 -1:0:0 0:0:0 1:1.0:140',
                     'Standard_Deviation': '2.000000',
                     'Total_Depth': 500,
                     'Total_Sites': 5,
@@ -91,7 +90,7 @@ OUTPUT={ '1:1-5': {'Average_Depth': 100,
                    'Mutant_Tally': 4,
                    'Name': 'NAME3',
                    'Number_of_Peaks': 3,
-                   'IndelLength:AlleleFraction:Reads': '-1:0.2:10 0:0:0 1:1.7:85',
+                   'IndelLength:AlleleFraction:Reads': '-1:0.117647058824:10 0:0:0 1:1.0:85',
                    'Standard_Deviation': '0.613784',
                    'Total_Depth': 250,
                    'Total_Sites': 5,
@@ -158,18 +157,29 @@ class TestAnalyzer(TestBase):
         output.update(analyzer.calc_summary_stats(MSI_SITE_DATA, cutoff))
         self.assertDictEqual(OUTPUT, output)               
 
+    def testHighestPeak(self):
+        """Test that the highest peak is returned
+        """
+        msi_sites1=dict(MSI_SITE_DATA['7']['1-5'])
+        msi_sites2=dict(MSI_SITE_DATA['1']['7-11'])
+        sites={0:'0:0:0'}
+        highest_peak1 = analyzer.calc_highest_peak(msi_sites1['indels'], sites)
+        highest_peak2 = analyzer.calc_highest_peak(msi_sites2['indels'], sites)
+        self.assertEqual(1.7, highest_peak1)
+        self.assertEqual(1.4, highest_peak2)
+        
     def testCalcNumberPeaks(self):
         """Test that the number of peaks and the peak annotation
         is being calculated/parsed correctly. 
         """
-        msi_sites=dict(MSI_SITE_DATA['1']['1-5'])
-        expected_output=dict(OUTPUT['1:1-5'])
+        msi_sites=dict(MSI_SITE_DATA['7']['1-5'])
+        expected_output=dict(OUTPUT['7:1-5'])
         cutoff=[0.05]
         peaks = []
         sites={0:'0:0:0'}
-        peaks, sites=analyzer.calc_number_peaks(msi_sites['indels'], sites, cutoff)
+        peaks, sites=analyzer.calc_number_peaks(msi_sites['indels'], sites, 1.7, cutoff)
         output_peaks=1
-        output_site_info={0: '0:0:0', -1: '-1:0.1:10'}
+        output_site_info={0: '0:0:0', 1: '1:1.0:85', -1: '-1:0.117647058824:10'}
         self.assertEqual(peaks, output_peaks)
         self.assertEqual(sites, output_site_info)
 
@@ -190,6 +200,7 @@ class TestAnalyzer(TestBase):
         msi_info = sorted(sample_msi, key=itemgetter('chrom'))
         for chrom, site_info in groupby(msi_info, key=itemgetter('chrom')):
             msi_dist[chrom].update(analyzer.calc_msi_dist(site_info, msi_dist[chrom]))
+
         self.assertDictEqual(msi_dist, MSI_SITE_DATA)
 
     def testCalcWildType(self):

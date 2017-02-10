@@ -97,16 +97,27 @@ def calc_wildtype(info, wildtype_depth, wildtype_fraction):
     for key in range(mn,mx):
         if key not in sites.keys():
             sites[key]=str(key)+':0:0'
-            
     return sites
         
-def calc_number_peaks(info, sites, cutoff):
+def calc_highest_peak(info, sites):
+    """
+    Calculate the highest peak
+    """
+    highest=0
+    for loci, details in info.items():
+        if details['allele_fraction'] >= highest:
+            highest = details['allele_fraction']
+    return highest
+
+def calc_number_peaks(info, sites, highest_peak, cutoff):
     """
     Calculate the number of peaks that are above cutoff
     """
     peaks=0
     for loci, details in info.items():
-        peak=":".join([str(loci), str(details['allele_fraction']), str(details['mutant_depth'])])
+        #take highest allele fraction and divide each alele fraction by that number
+        allele_fraction = details['allele_fraction']/highest_peak
+        peak=":".join([str(loci), str(allele_fraction), str(details['mutant_depth'])])
         #Overwrite this site if the allele fraction is more than the cutoff
         sites[loci]=peak
         if details['allele_fraction']>= cutoff:
@@ -160,7 +171,8 @@ def calc_summary_stats(msi_sites, cutoff):
                 sites[0]='0:0:0'
             if info['indels']:
                 sites=calc_wildtype(info['indels'], wildtype_depth, wildtype_fraction)
-                num_peaks, peaks=calc_number_peaks(info['indels'], sites, cutoff)
+                highest_peak = calc_highest_peak(info['indels'], sites)
+                num_peaks, peaks=calc_number_peaks(info['indels'], sites, highest_peak, cutoff)
                 stdev=calc_std_peaks(peaks.values())
                 #Sort the peak list naturally (-3,-2,-1,0,1,2,3)
                 peak_list=(" ").join(str(x) for x in natsort.natsorted(peaks.values()))
@@ -220,7 +232,7 @@ def action(args):
     for chrom, site_info in groupby(msi_info, key=itemgetter('chrom')):
         msi_sites[chrom].update(calc_msi_dist(site_info, msi_sites[chrom]))
     output.update(calc_summary_stats(msi_sites, cutoff))
-
+    sys.exit()
     fieldnames=['Position','Name','Average_Depth','Number_of_Peaks','Standard_Deviation','IndelLength:AlleleFraction:Reads']
 
     writer = csv.DictWriter(args.outfile, fieldnames = fieldnames,  extrasaction = 'ignore', delimiter = '\t')
