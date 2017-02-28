@@ -9,6 +9,7 @@ import logging
 import csv
 import sys
 import json
+import copy
 
 from numpy import std, average
 from operator import itemgetter
@@ -28,108 +29,32 @@ msi_testfiles = path.join(config.datadir, 'MSI')
 
 control ='5437_E05_OPXv4_NA12878_MA0013'
 
-MSI_SITE_DATA={ '1': {'1-5': {'end': '5',
-                              'indels': {-1: {'allele_fraction': 0.1, 
-                                              'mutant_depth': 10}},
-                              'mutant_depth': 10,
-                              'mutant_tally': 1,
-                              'name': 'NAME1',
-                              'range': set([1, 2, 3, 4, 5]),
-                              'site_depth': 100,
-                              'start': '1',
-                              'total_depth': 500,
-                              'total_sites': 5},
-                      '7-11': {'end': '11',
-                               'indels': {-3: {'allele_fraction': 1.4,
-                                               'mutant_depth': 140},
-                                          1: {'allele_fraction': 1.4, 
-                                              'mutant_depth': 140}},
-                               'mutant_depth': 280,
-                               'mutant_tally': 6,
-                               'name': 'NAME2',
-                               'range': set([7, 8, 9, 10, 11]),
-                               'site_depth': 100,
-                               'start': '7',
-                               'total_depth': 500,
-                               'total_sites': 5}},
-                '7': {'1-5': {'end': '5',
-                              'indels': {-1: {'allele_fraction': 0.2, 
-                                              'mutant_depth': 10},
-                                         1: {'allele_fraction': 1.7, 
-                                             'mutant_depth': 85}},
-                              'mutant_depth': 95,
-                              'mutant_tally': 4,
-                              'name': 'NAME3',
-                              'range': set([1, 2, 3, 4, 5]),
-                              'site_depth': 50,
-                              'start': '1',
-                              'total_depth': 250,
-                              'total_sites': 5}}}
+MSI_LOCI={'1': {1: '1:1-5', 2: '1:1-5', 3: '1:1-5', 4: '1:1-5', 5: '1:1-5', 7: '1:7-11', 8: '1:7-11', 9: '1:7-11', 10: '1:7-11', 11: '1:7-11'}, 
+          '7': {1: '7:1-5', 2: '7:1-5', 3: '7:1-5', 4: '7:1-5', 5: '7:1-5'}}
 
-OUTPUT={ '1:1-5': {'Average_Depth': 100,
-                   'Mutant_Tally': 1,
-                   'Name': 'NAME1',
-                   'Number_of_Peaks': 2,
-                   'IndelLength:AlleleFraction:Reads': '-1:1.0:10 0:0.9:90',
-                   'Standard_Deviation': '0.300000',
-                   'Total_Depth': 500,
-                   'Total_Sites': 5,
-                   'Wildtype_Depth': 90,
-                   'Wildtype_Fraction': 0.9},
-         '1:7-11': {'Average_Depth': 100,
-                    'Mutant_Tally': 6,
-                    'Name': 'NAME2',
-                    'Number_of_Peaks': 3,
-                    'IndelLength:AlleleFraction:Reads': '-3:1.0:140 -2:0:0 -1:0:0 0:0:0 1:1.0:140',
-                    'Standard_Deviation': '2.000000',
-                    'Total_Depth': 500,
-                    'Total_Sites': 5,
-                    'Wildtype_Depth': 0,
-                    'Wildtype_Fraction': 0},
-         '7:1-5': {'Average_Depth': 50,
-                   'Mutant_Tally': 4,
-                   'Name': 'NAME3',
-                   'Number_of_Peaks': 3,
-                   'IndelLength:AlleleFraction:Reads': '-1:0.117647058824:10 0:0:0 1:1.0:85',
-                   'Standard_Deviation': '0.613784',
-                   'Total_Depth': 250,
-                   'Total_Sites': 5,
-                   'Wildtype_Depth': 0,
-                   'Wildtype_Fraction': 0}}
-MSI_LOCI={'1': {'1-5': {'start': '1',
-                        'mutant_tally': 0,
-                        'total_depth': 0,
-                        'end': '5',
-                        'name': 'NAME1',
-                        'mutant_depth': 0,
-                        'total_sites': 0,
-                        'range': set([1, 2, 3, 4, 5]),
-                        'indels': {}},
-                '7-11': {'start': '7',
-                         'mutant_tally': 0,
-                         'total_depth': 0,
-                         'end': '11',
-                         'name': 'NAME2',
-                         'mutant_depth': 0,
-                         'total_sites': 0,
-                         'range': set([8, 9, 10, 11, 7]),
-                         'indels': {}}},
-          '7': {'1-5': {'start': '1',
-                        'mutant_tally': 0,
-                        'total_depth': 0,
-                        'end': '5',
-                        'name': 'NAME3',
-                        'mutant_depth': 0,
-                        'total_sites': 0,
-                        'range': set([1, 2, 3, 4, 5]),
-                        'indels': {}}}}
+OUTPUT_RAW={'1:1-5': {'total_depth': 0, 'wildtype_depth': 0, 'Name': 'NAME1', 'mutant_depth': 0, 'mutant_tally': 0, 'total_sites': 0, 'indels': {}}, 
+            '7:1-5': {'total_depth': 0, 'wildtype_depth': 0, 'Name': 'NAME3', 'mutant_depth': 0, 'mutant_tally': 0, 'total_sites': 0, 'indels': {}}, 
+            '1:7-11': {'total_depth': 0, 'wildtype_depth': 0, 'Name': 'NAME2', 'mutant_depth': 0, 'mutant_tally': 0, 'total_sites': 0, 'indels': {}}}
 
-                
+MSI_SITE_DATA={'1:1-5': {'site_depth': 100, 'total_depth': 500, 'wildtype_depth': 500, 'indels': {},
+                         'mutant_depth': 0,'mutant_tally': 0, 'total_sites': 5, 'Name': 'NAME1'}, 
+               '7:1-5': {'site_depth': 50, 'total_depth': 250, 'wildtype_depth': 136,
+                         'indels': {1: {'site_depth': 150, 'mutant_tally': 3, 'allele_fraction': 0.7333333333333333, 'mutant_depth': 110}, 
+                                    -1: {'site_depth': 50, 'mutant_tally': 1, 'allele_fraction': 0.08, 'mutant_depth': 4}}, 
+                         'mutant_depth': 114, 'mutant_tally': 4, 'total_sites': 5, 'Name': 'NAME3'}, 
+               '1:7-11': {'site_depth': 100, 'total_depth': 500, 'wildtype_depth': 210,
+                          'indels': {1: {'site_depth': 300, 'mutant_tally': 3, 'allele_fraction': 0.4, 'mutant_depth': 120}, 
+                                     -3: {'site_depth': 300, 'mutant_tally': 3, 'allele_fraction': 0.35, 'mutant_depth': 105}}, 
+                          'mutant_depth': 225, 'mutant_tally': 6, 'total_sites': 5, 'Name': 'NAME2'}}
+
+OUTPUT={'1:1-5': {'IndelLength:AlleleFraction:Reads': '0:1.0:100', 'Standard_Deviation': 0, 'Average_Depth': 100, 'Number_of_Peaks': 1, 'Name': 'NAME1'}, 
+        '7:1-5': {'IndelLength:AlleleFraction:Reads': '-1:0.109090909091:4 0:0.741818181818:27 1:1.0:110', 'Standard_Deviation': '0.493303', 'Average_Depth': 50, 'Number_of_Peaks': 3, 'Name': 'NAME3'}, 
+        '1:7-11': {'IndelLength:AlleleFraction:Reads': '-3:0.875:105 -2:0:0 -1:0:0 0:0.0:27 1:1.0:120', 'Standard_Deviation': '1.904576', 'Average_Depth': 100, 'Number_of_Peaks': 3, 'Name': 'NAME2'}}
+
 class TestFormatter(TestBase):
     """
     Test the msi formatter script
     """
-
     def testCoords(self):
         
         row =['1', '45795895', '45795905', 'NAME1']
@@ -148,76 +73,75 @@ class TestAnalyzer(TestBase):
     Test the msi analyzer subcommands
     """
 
+    def testParseMSIBedfile(self):
+        """Test that the MSI Bed file is parsed correctly
+        """
+        msi_sites, output_info={}, {}
+        for row in csv.DictReader(open(path.join(msi_testfiles, 'test.msi.bed')), delimiter='\t', fieldnames=['chrom','start','end','name']):
+            msi_sites, output_info = analyzer.parse_msi_bedfile(row, msi_sites, output_info)
+        self.assertDictEqual(msi_sites, MSI_LOCI)
+        self.assertDictEqual(output_info, OUTPUT_RAW)
+        
+    def testCalcMSIDist(self):
+        """Test MSI site distribution calculation"""
+        self.maxDiff = None
+        output_info = copy.deepcopy(OUTPUT_RAW)
+        sample_msi=csv.DictReader(open(path.join(msi_testfiles, 'test.msi_output')), delimiter='\t', restkey='Misc')
+
+        for row in sample_msi:
+            loci_position = MSI_LOCI[row['chrom']][int(row['position'])]
+            output_info[loci_position].update(analyzer.calc_msi_dist(row, output_info[loci_position]))
+
+        self.assertDictEqual(output_info, MSI_SITE_DATA)
+        
     def testCalcSummaryStats(self):
         """Test MSI summary calculations
         """
         self.maxDiff=None
-        output={}
+        local_msi_site = copy.deepcopy(MSI_SITE_DATA)
+        output_local={}
         cutoff=float(0.05)
-        output.update(analyzer.calc_summary_stats(MSI_SITE_DATA, cutoff))
-        self.assertDictEqual(OUTPUT, output)               
+        output_local.update(analyzer.calc_summary_stats(local_msi_site, cutoff))
+        self.assertDictEqual(output_local, OUTPUT)               
 
     def testHighestPeak(self):
         """Test that the highest peak is returned
         """
-        msi_sites1=dict(MSI_SITE_DATA['7']['1-5'])
-        msi_sites2=dict(MSI_SITE_DATA['1']['7-11'])
-        sites={0:'0:0:0'}
-        highest_peak1 = analyzer.calc_highest_peak(msi_sites1['indels'], sites)
-        highest_peak2 = analyzer.calc_highest_peak(msi_sites2['indels'], sites)
-        self.assertEqual(1.7, highest_peak1)
-        self.assertEqual(1.4, highest_peak2)
+        msi_sites1=copy.deepcopy(MSI_SITE_DATA['7:1-5'])
+        msi_sites2=copy.deepcopy(MSI_SITE_DATA['1:7-11'])
+        wt_1 = float(msi_sites1['wildtype_depth'])/msi_sites1['total_depth']
+        wt_2 = float(msi_sites2['wildtype_depth'])/msi_sites2['total_depth']
+        highest_peak1 = analyzer.calc_highest_peak(msi_sites1['indels'], wt_1)
+        highest_peak2 = analyzer.calc_highest_peak(msi_sites2['indels'], wt_2)
+        self.assertEqual(0.7333333333333333, highest_peak1)
+        self.assertEqual(0.42, highest_peak2)
         
     def testCalcNumberPeaks(self):
         """Test that the number of peaks and the peak annotation
         is being calculated/parsed correctly. 
         """
-        msi_sites=dict(MSI_SITE_DATA['7']['1-5'])
-        expected_output=dict(OUTPUT['7:1-5'])
+        msi_sites1=copy.deepcopy(MSI_SITE_DATA['1:7-11'])
+        wt_1 = float(msi_sites1['wildtype_depth'])/msi_sites1['total_depth']
         cutoff=[0.05]
         peaks = []
         sites={0:'0:0:0'}
-        peaks, sites=analyzer.calc_number_peaks(msi_sites['indels'], sites, 1.7, cutoff)
+        peaks, sites=analyzer.calc_number_peaks(msi_sites1['indels'], sites, 0.42, cutoff)
         output_peaks=1
-        output_site_info={0: '0:0:0', 1: '1:1.0:85', -1: '-1:0.117647058824:10'}
+        output_site_info= {0: '0:0:0', 1: '1:0.952380952381:120', -3: '-3:0.833333333333:105'}
         self.assertEqual(peaks, output_peaks)
         self.assertEqual(sites, output_site_info)
 
-    def testParseMSIBedfile(self):
-        """Test that the MSI Bed file is parsed correctly
-        """
-        msi_loci={}
-        for row in csv.DictReader(open(path.join(msi_testfiles, 'test.msi.bed')), delimiter='\t', fieldnames=['chrom','start','end','name']):
-            msi_loci.update(analyzer.parse_msi_bedfile(row, msi_loci))
-        self.assertDictEqual(msi_loci, MSI_LOCI)
-        
-    def testCalcMSIDist(self):
-        """Test MSI site distribution calculation"""
-        msi_dist={}
-        for row in csv.DictReader(open(path.join(msi_testfiles, 'test.msi.bed')), delimiter='\t', fieldnames=['chrom','start','end','name']):
-            msi_dist.update(analyzer.parse_msi_bedfile(row, msi_dist))
-        sample_msi=csv.DictReader(open(path.join(msi_testfiles, 'test.msi_output')), delimiter='\t', restkey='Misc')
-        msi_info = sorted(sample_msi, key=itemgetter('chrom'))
-        for chrom, site_info in groupby(msi_info, key=itemgetter('chrom')):
-            msi_dist[chrom].update(analyzer.calc_msi_dist(site_info, msi_dist[chrom]))
-
-        self.assertDictEqual(msi_dist, MSI_SITE_DATA)
-
     def testCalcWildType(self):
         """Test the Wildtype calculations"""
-        msi_sites=dict(MSI_SITE_DATA)
+        msi_sites=copy.deepcopy(MSI_SITE_DATA['1:7-11'])
         sites = {}
-        wt_output={-1: '-1:0:0', 0: '0:0:90', 1: '1:0:0'}
-        for chrom, msi_info in msi_sites.items():
-            for loci, info in msi_info.items():
-                average_depth=info['total_depth']/info['total_sites']
-                if average_depth != 0 and info['mutant_depth'] < average_depth:
-                    wildtype_fraction=float(average_depth-info['mutant_depth'])/average_depth
-                    wildtype_depth=int(average_depth-info['mutant_depth'])
-                else:
-                    wildtype_fraction, wildtype_tally=0,0
-                sites=analyzer.calc_wildtype(info['indels'], wildtype_depth, wildtype_fraction)
-        self.assertDictEqual(sites, wt_output)               
+
+        wt_1 = float(msi_sites['wildtype_depth'])/msi_sites['total_depth']
+        wt_ave = float(msi_sites['wildtype_depth'])/msi_sites['total_sites']
+        sites=analyzer.calc_wildtype(msi_sites['indels'].keys(), wt_ave, wt_1, 0.42)
+        wt_output={0: '0:1.0:42.0', -1: '-1:0:0', -3: '-3:0:0', -2: '-2:0:0', 1: '1:0:0'}
+
+        self.assertDictEqual(sites, wt_output)
 
     def testCalcSTDPeaks(self):
         """Test the standard deviation calculations"""
