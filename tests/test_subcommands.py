@@ -47,9 +47,9 @@ MSI_SITE_DATA={'1:1-5': {'site_depth': 100, 'total_depth': 500, 'wildtype_depth'
                                      -3: {'site_depth': 300, 'mutant_tally': 3, 'allele_fraction': 0.35, 'mutant_depth': 105}}, 
                           'mutant_depth': 225, 'mutant_tally': 6, 'total_sites': 5, 'Name': 'NAME2'}}
 
-OUTPUT={'1:1-5': {'IndelLength:AlleleFraction:Reads': '0:1.0:100', 'Standard_Deviation': 0, 'Average_Depth': 100, 'Number_of_Peaks': 1, 'Name': 'NAME1'}, 
-        '7:1-5': {'IndelLength:AlleleFraction:Reads': '-1:0.109090909091:4 0:0.741818181818:27 1:1.0:110', 'Standard_Deviation': '0.493303', 'Average_Depth': 50, 'Number_of_Peaks': 3, 'Name': 'NAME3'}, 
-        '1:7-11': {'IndelLength:AlleleFraction:Reads': '-3:0.875:105 -2:0:0 -1:0:0 0:0.0:27 1:1.0:120', 'Standard_Deviation': '1.904576', 'Average_Depth': 100, 'Number_of_Peaks': 3, 'Name': 'NAME2'}}
+OUTPUT = {'1:1-5': {'IndelLength:AlleleFraction:Reads': '0:1.0:100', 'Standard_Deviation': 0, 'Average_Depth': 100, 'Number_of_Peaks': 1, 'Name': 'NAME1'}, 
+          '7:1-5': {'IndelLength:AlleleFraction:Reads': '-1:0.0363636363636:4 0:0.245454545455:27 1:1.0:110', 'Standard_Deviation': '0.493303', 'Average_Depth': 50, 'Number_of_Peaks': 2, 'Name': 'NAME3'}, 
+          '1:7-11': {'IndelLength:AlleleFraction:Reads': '-3:0.875:105 -2:0:0 -1:0:0 0:0.225:27 1:1.0:120', 'Standard_Deviation': '1.904576', 'Average_Depth': 100, 'Number_of_Peaks': 3, 'Name': 'NAME2'}}
 
 class TestFormatter(TestBase):
     """
@@ -111,34 +111,37 @@ class TestAnalyzer(TestBase):
         msi_sites2=copy.deepcopy(MSI_SITE_DATA['1:7-11'])
         wt_1 = float(msi_sites1['wildtype_depth'])/msi_sites1['total_depth']
         wt_2 = float(msi_sites2['wildtype_depth'])/msi_sites2['total_depth']
-        highest_peak1 = analyzer.calc_highest_peak(msi_sites1['indels'], wt_1)
-        highest_peak2 = analyzer.calc_highest_peak(msi_sites2['indels'], wt_2)
-        self.assertEqual(0.7333333333333333, highest_peak1)
-        self.assertEqual(0.42, highest_peak2)
-        
+        wt_ave_depth1=int(msi_sites1['wildtype_depth'])/msi_sites1['total_sites']
+        wt_ave_depth2=int(msi_sites2['wildtype_depth'])/msi_sites2['total_sites']
+        highest_reads1 = analyzer.calc_highest_peak(msi_sites1['indels'], wt_ave_depth1, wt_1)
+        highest_reads2 = analyzer.calc_highest_peak(msi_sites2['indels'], wt_ave_depth2, wt_2)
+        self.assertEqual(110, highest_reads1)
+        self.assertEqual(42, highest_reads2)        
+
     def testCalcNumberPeaks(self):
         """Test that the number of peaks and the peak annotation
         is being calculated/parsed correctly. 
         """
-        msi_sites1=copy.deepcopy(MSI_SITE_DATA['1:7-11'])
+        msi_sites1=copy.deepcopy(MSI_SITE_DATA['7:1-5'])
         wt_1 = float(msi_sites1['wildtype_depth'])/msi_sites1['total_depth']
+        wt_ave_depth1=int(msi_sites1['wildtype_depth'])/msi_sites1['total_sites']
         cutoff=[0.05]
         peaks = []
-        sites={0:'0:0:0'}
-        peaks, sites=analyzer.calc_number_peaks(msi_sites1['indels'], sites, 0.42, cutoff)
+        highest_reads1 = analyzer.calc_highest_peak(msi_sites1['indels'], wt_ave_depth1, wt_1)
+        sites={0: '0:1.0:27'}
+        num_peaks, sites=analyzer.calc_number_peaks(msi_sites1['indels'], sites, highest_reads1, cutoff)
         output_peaks=1
-        output_site_info= {0: '0:0:0', 1: '1:0.952380952381:120', -3: '-3:0.833333333333:105'}
-        self.assertEqual(peaks, output_peaks)
+        output_site_info={0: '0:1.0:27', 1: '1:1.0:110', -1: '-1:0.0363636363636:4'}
+        self.assertEqual(num_peaks, output_peaks)
         self.assertEqual(sites, output_site_info)
 
     def testCalcWildType(self):
         """Test the Wildtype calculations"""
         msi_sites=copy.deepcopy(MSI_SITE_DATA['1:7-11'])
         sites = {}
-
         wt_1 = float(msi_sites['wildtype_depth'])/msi_sites['total_depth']
         wt_ave = float(msi_sites['wildtype_depth'])/msi_sites['total_sites']
-        sites=analyzer.calc_wildtype(msi_sites['indels'].keys(), wt_ave, wt_1, 0.42)
+        sites=analyzer.calc_wildtype(msi_sites['indels'].keys(), wt_ave, wt_1, wt_ave)
         wt_output={0: '0:1.0:42.0', -1: '-1:0:0', -3: '-3:0:0', -2: '-2:0:0', 1: '1:0:0'}
 
         self.assertDictEqual(sites, wt_output)

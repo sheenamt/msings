@@ -89,12 +89,13 @@ def calc_msi_dist(variant,msi_site):
             msi_site['indels'][length]['allele_fraction']=(msi_site['indels'][length]['mutant_depth']/float(msi_site['indels'][length]['site_depth']))
     return msi_site
 
-def calc_wildtype(indels, wildtype_ave_depth, wildtype_fraction, highest_peak):
+def calc_wildtype(indels, wildtype_ave_depth, wildtype_fraction, highest_reads): 
     """
     """
     mx=int(max(indels))+1
     mn=int(min(indels))
-    wildtype=":".join([str(0), str(float(wildtype_fraction)/highest_peak), str(wildtype_ave_depth)])
+    wt_frac = float(wildtype_ave_depth)/highest_reads
+    wildtype=":".join([str(0), str(wt_frac), str(wildtype_ave_depth)])
     sites={0:wildtype}
 
     for key in range(mn,mx):
@@ -102,33 +103,37 @@ def calc_wildtype(indels, wildtype_ave_depth, wildtype_fraction, highest_peak):
             sites[key]=str(key)+':0:0'
     return sites
 
-def calc_highest_peak(info, wt_fraction):
+def calc_highest_peak(info, wt_ave_reads, wt_fraction):
     """
     Calculate the highest peak
     """
-    highest=wt_fraction
-    for loci, details in info.items():
-        if details['allele_fraction'] >= highest:
-            highest = details['allele_fraction']
-    return highest
+    highest_reads=wt_ave_reads
+    highest_frac=wt_fraction
 
-def calc_number_peaks(info, sites, highest_peak, cutoff):
+    for loci, details in info.items():
+        if details['allele_fraction'] >= highest_frac:
+            highest_frac = details['allele_fraction']
+            highest_reads = details['mutant_depth']
+
+    return highest_reads
+
+def calc_number_peaks(info, sites, highest_reads, cutoff):
     """
     Calculate the number of peaks that are above cutoff
     """
-    peaks=0
+    peaks =0
     for loci, details in info.items():
         #take highest allele fraction and divide each alele fraction by that number
-        allele_fraction = details['allele_fraction']/highest_peak
+        allele_fraction = float(details['mutant_depth'])/highest_reads
         peak=":".join([str(loci), str(allele_fraction), str(details['mutant_depth'])])
         #Overwrite this site if the allele fraction is more than the cutoff
         sites[loci]=peak
-        if details['allele_fraction']>= cutoff:
+        if allele_fraction>= cutoff:
             peaks+=1
-
     #wildtype is sites[0], if fraction is above cutoff, it counts as a peak
     if sites[0].split(':')[1] >= cutoff:
         peaks+=1
+
     return peaks, sites
 
 def calc_std_peaks(peaks):
@@ -167,9 +172,9 @@ def calc_summary_stats(output_info, cutoff):
             wildtype_fraction, wildtype_depth=0,0
             sites[0]='0:0:0'
         if info['indels']:
-            highest_peak = calc_highest_peak(info['indels'], wildtype_fraction)
-            sites=calc_wildtype(info['indels'].keys(), wildtype_ave_depth, wildtype_fraction, highest_peak)
-            num_peaks, peaks=calc_number_peaks(info['indels'], sites, highest_peak, cutoff)
+            highest_reads = calc_highest_peak(info['indels'], wildtype_ave_depth, wildtype_fraction)
+            sites=calc_wildtype(info['indels'].keys(), wildtype_ave_depth, wildtype_fraction, highest_reads)
+            num_peaks, peaks=calc_number_peaks(info['indels'], sites, highest_reads, cutoff)
             stdev=calc_std_peaks(peaks.values())
             #Sort the peak list naturally (-3,-2,-1,0,1,2,3)
             peak_list=(" ").join(str(x) for x in natsort.natsorted(peaks.values()))
@@ -225,7 +230,7 @@ def action(args):
     for row in sample_msi:
         loci_name = msi_sites[row['chrom']][int(row['position'])]
         output_info[loci_name].update(calc_msi_dist(row, output_info[loci_name]))
-
+    print 'output:', output_info
     output.update(calc_summary_stats(output_info, cutoff))
     fieldnames=['Position','Name','Average_Depth','Number_of_Peaks','Standard_Deviation','IndelLength:AlleleFraction:Reads']
 
