@@ -29,7 +29,7 @@ def build_parser(parser):
 
 
 def action(args):
-    specimens = defaultdict(dict)
+    specimens = collections.defaultdict(dict)
     prefixes = []
     variant_keys =[]
     files = walker(args.path)  
