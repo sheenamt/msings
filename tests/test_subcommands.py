@@ -30,11 +30,17 @@ msi_testfiles = path.join(config.datadir, 'MSI')
 control ='5437_E05_OPXv4_NA12878_MA0013'
 
 MSI_LOCI={'1': {1: '1:1-5', 2: '1:1-5', 3: '1:1-5', 4: '1:1-5', 5: '1:1-5', 7: '1:7-11', 8: '1:7-11', 9: '1:7-11', 10: '1:7-11', 11: '1:7-11'}, 
-          '7': {1: '7:1-5', 2: '7:1-5', 3: '7:1-5', 4: '7:1-5', 5: '7:1-5'}}
+          '7': {1: '7:1-5', 2: '7:1-5', 3: '7:1-5', 4: '7:1-5', 5: '7:1-5', 7: '7:7-11', 8: '7:7-11', 9: '7:7-11', 10: '7:7-11', 11: '7:7-11'}}
 
 OUTPUT_RAW={'1:1-5': {'total_depth': 0, 'wildtype_depth': 0, 'Name': 'NAME1', 'mutant_depth': 0, 'mutant_tally': 0, 'total_sites': 0, 'indels': {}}, 
             '7:1-5': {'total_depth': 0, 'wildtype_depth': 0, 'Name': 'NAME3', 'mutant_depth': 0, 'mutant_tally': 0, 'total_sites': 0, 'indels': {}}, 
-            '1:7-11': {'total_depth': 0, 'wildtype_depth': 0, 'Name': 'NAME2', 'mutant_depth': 0, 'mutant_tally': 0, 'total_sites': 0, 'indels': {}}}
+            '1:7-11': {'total_depth': 0, 'wildtype_depth': 0, 'Name': 'NAME2', 'mutant_depth': 0, 'mutant_tally': 0, 'total_sites': 0, 'indels': {}},
+            '7:7-11': {'total_depth': 0, 'wildtype_depth': 0, 'Name': 'NAME4', 'mutant_depth': 0, 'mutant_tally': 0, 'total_sites': 0, 'indels': {}}}
+
+#'1:1-5' == wt
+#'7:1-5' == mut biggest peak
+#'1:7-11' == wt biggest peak
+#'7:7-11' == no coverage
 
 MSI_SITE_DATA={'1:1-5': {'site_depth': 100, 'total_depth': 500, 'wildtype_depth': 500, 'indels': {},
                          'mutant_depth': 0,'mutant_tally': 0, 'total_sites': 5, 'Name': 'NAME1'}, 
@@ -43,13 +49,17 @@ MSI_SITE_DATA={'1:1-5': {'site_depth': 100, 'total_depth': 500, 'wildtype_depth'
                                     -1: {'site_depth': 50, 'mutant_tally': 1, 'allele_fraction': 0.08, 'mutant_depth': 4}}, 
                          'mutant_depth': 114, 'mutant_tally': 4, 'total_sites': 5, 'Name': 'NAME3'}, 
                '1:7-11': {'site_depth': 100, 'total_depth': 500, 'wildtype_depth': 210,
-                          'indels': {1: {'site_depth': 300, 'mutant_tally': 3, 'allele_fraction': 0.4, 'mutant_depth': 120}, 
-                                     -3: {'site_depth': 300, 'mutant_tally': 3, 'allele_fraction': 0.35, 'mutant_depth': 105}}, 
-                          'mutant_depth': 225, 'mutant_tally': 6, 'total_sites': 5, 'Name': 'NAME2'}}
+                          'indels': {1: {'site_depth': 300, 'mutant_tally': 3, 'allele_fraction': 0.04666666666666667, 'mutant_depth': 14}, 
+                                     -3: {'site_depth': 300, 'mutant_tally': 3, 'allele_fraction': 0.05333333333333334, 'mutant_depth': 16}}, 
+                          'mutant_depth': 30, 'mutant_tally': 6, 'total_sites': 5, 'Name': 'NAME2'},
+               '7:7-11': {'site_depth': 0, 'total_depth': 0, 'wildtype_depth': 00,
+                          'indels': {},
+                          'mutant_depth': 0, 'mutant_tally': 0, 'total_sites': 5, 'Name': 'NAME4'}}
 
 OUTPUT = {'1:1-5': {'IndelLength:AlleleFraction:Reads': '0:1.0:100', 'Standard_Deviation': 0, 'Average_Depth': 100, 'Number_of_Peaks': 1, 'Name': 'NAME1'}, 
+          '7:7-11': {'IndelLength:AlleleFraction:Reads': '0:1.0:0', 'Standard_Deviation': 0, 'Average_Depth': 0, 'Number_of_Peaks': 1, 'Name': 'NAME4'}, 
           '7:1-5': {'IndelLength:AlleleFraction:Reads': '-1:0.0363636363636:4 0:0.245454545455:27 1:1.0:110', 'Standard_Deviation': '0.493303', 'Average_Depth': 50, 'Number_of_Peaks': 2, 'Name': 'NAME3'}, 
-          '1:7-11': {'IndelLength:AlleleFraction:Reads': '-3:0.875:105 -2:0:0 -1:0:0 0:0.225:27 1:1.0:120', 'Standard_Deviation': '1.904576', 'Average_Depth': 100, 'Number_of_Peaks': 3, 'Name': 'NAME2'}}
+          '1:7-11': {'IndelLength:AlleleFraction:Reads': '-3:0.380952380952:16 -2:0:0 -1:0:0 0:1.0:42 1:0.333333333333:14', 'Standard_Deviation': '1.404084', 'Average_Depth': 100, 'Number_of_Peaks': 3, 'Name': 'NAME2'}}
 
 class TestFormatter(TestBase):
     """
@@ -77,6 +87,7 @@ class TestAnalyzer(TestBase):
         """Test that the MSI Bed file is parsed correctly
         """
         msi_sites, output_info={}, {}
+        self.maxDiff = None
         for row in csv.DictReader(open(path.join(msi_testfiles, 'test.msi.bed')), delimiter='\t', fieldnames=['chrom','start','end','name']):
             msi_sites, output_info = analyzer.parse_msi_bedfile(row, msi_sites, output_info)
         self.assertDictEqual(msi_sites, MSI_LOCI)
