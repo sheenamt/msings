@@ -11,7 +11,7 @@ import csv
 import sys
 import argparse
 import re
-
+import natsort
 from collections import defaultdict
 
 def build_parser(parser):
@@ -19,9 +19,9 @@ def build_parser(parser):
                         type=argparse.FileType('rU'),
                         default=sys.stdin,
                         help='Path to tab delimited bed file of format chr start end')
-    parser.add_argument('-o', '--outfile', 
+    parser.add_argument('outfile', 
                         type=argparse.FileType('w'),
-                        help='Name of the output file. msi_intervals will be tacked to the end')
+                        help='Name of the output file')
 
 def coords(row, chromosome=0, start=1, stop=2):
     """Return chromosome, start, end - assuming that column indices are
@@ -37,7 +37,7 @@ def msi_interval_creator(ranges):
     """
     data=[]
     #make sure the chr is sorted
-    for chr in sorted(ranges.keys()):
+    for chr in natsort.natsorted(ranges.keys()):
         #make sure the start position is sorted
         for row in sorted(ranges[chr]):
             info=(chr, row, '-', 'T')
@@ -46,10 +46,7 @@ def msi_interval_creator(ranges):
 
 def action(args):
     bedfile=csv.reader(args.bedfile,delimiter='\t')
-    if args.outfile:
-        output=open(args.outfile.name.strip('.')+".msi_intervals",'w')
-    else:
-        output=open(args.bedfile.name.strip('.bed')+".msi_intervals",'w')
+    output=args.outfile
         
     # prepare a dictionary of chromosome: set(positions)
     # includes all positions between start-stop
@@ -57,7 +54,6 @@ def action(args):
     msi_calls=defaultdict()
     writer=csv.writer(output,delimiter='\t')
     for row in bedfile:
-        row[0]=row[0].strip('chr')
         chr, beg, end = coords(row)
         ranges[chr].update(range(beg, end + 1))
     writer.writerows(msi_interval_creator(ranges))
