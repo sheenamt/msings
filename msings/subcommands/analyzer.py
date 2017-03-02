@@ -95,6 +95,7 @@ def calc_msi_dist(variant,msi_site):
 
 def calc_wildtype(indels, wildtype_ave_depth, wildtype_fraction, highest_reads): 
     """
+    Set up wildtype info and empty values for each indel length
     """
     mx=int(max(indels))+1
     mn=int(min(indels))
@@ -198,6 +199,10 @@ def calc_summary_stats(output_info, cutoff):
     return output_info
     
 def parse_msi_bedfile(row, msi_sites, output_info):
+    """Create two dictionaries from bedfile
+    one maps positions to name of loci
+    one is output info for each loci
+    """
     msi_loci=row['chrom']+':'+row['start']+"-"+row['end']
     #Create chrom dictionary if not already present
     if not row['chrom'] in msi_sites.keys():
