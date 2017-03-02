@@ -14,8 +14,8 @@ subprocess.call('git shortlog --format="XXYYXX%h" | grep -c XXYYXX > msings/data
 from msings import __version__
 from msings.scripts import script
 
-params = {'author': 'Sheena Scroggins',
-          'author_email': 'sheena.scroggins@gmail.com',
+params = {'author': 'Sheena Todunter',
+          'author_email': 'sheena.todhunter@gmail.com',
           'description': script.__doc__.strip(),
           'name': 'msings',
           'packages': ['msings','msings.scripts','msings.subcommands'],
@@ -26,10 +26,6 @@ params = {'author': 'Sheena Scroggins',
           'setup_requires':['numpy'],
           'install_requires': [
               'natsort==3.5.3',
-              'wsgiref==0.1.2',
-              'xlrd==0.9.4',
-              'xlwt==1.0.0',
-              'bioscons==0.8.1,'
 ],
           }
 
