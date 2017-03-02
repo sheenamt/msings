@@ -1,8 +1,10 @@
 #!/bin/bash
 
-INTERVALS_FILE=$1;
-BEDFILE=$2;
-MSI_BASELINE=$3;
+source msings-env/bin/activate
+
+INTERVALS_FILE=doc/mSINGS_TCGA.msi_intervals
+BEDFILE=doc/mSINGS_TCGA.bed
+MSI_BASELINE=doc/mSINGS_TCGA.baseline
 REF_GENOME=$4;
 BAM_LIST=${5:}
 

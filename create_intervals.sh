@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source msings-env/bin/activate
+
 BEDFILE=$1;
 
 # get basename of bedfile

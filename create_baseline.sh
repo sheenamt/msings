@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source msings-env/bin/activate
+
 INTERVALS_FILE=$1;
 BEDFILE=$2;
 REF_GENOME=$3;
