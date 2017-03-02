@@ -72,11 +72,11 @@ def calc_msi_dist(variant,msi_site):
         #Keep tally of mutants seen 
         msi_site['mutant_tally']+=1
         #If we haven't seen this length of mutation, add it
-        try:
-            allele_fraction=reads/float(msi_site['site_depth'])
-        except ZeroDivisionError:
-            allele_fraction=0.0
         if not length in msi_site['indels'].keys():
+            try:
+                allele_fraction=reads/float(msi_site['site_depth'])
+            except ZeroDivisionError:
+                allele_fraction=0.0
             msi_site['indels'][length]={'allele_fraction':allele_fraction}
             msi_site['indels'][length]['site_depth']=int(variant['q10_depth'])
             msi_site['indels'][length]['mutant_depth']=reads
@@ -86,7 +86,11 @@ def calc_msi_dist(variant,msi_site):
             msi_site['indels'][length]['mutant_tally']+=1
             msi_site['indels'][length]['site_depth']+=int(variant['q10_depth'])
             msi_site['indels'][length]['mutant_depth']=msi_site['indels'][length]['mutant_depth']+reads
-            msi_site['indels'][length]['allele_fraction']=(msi_site['indels'][length]['mutant_depth']/float(msi_site['indels'][length]['site_depth']))
+            try:
+                msi_site['indels'][length]['allele_fraction']=float(msi_site['indels'][length]['mutant_depth'])/msi_site['indels'][length]['site_depth']
+            except ZeroDivisionError:
+                msi_site['indels'][length]['allele_fraction']=msi_site['indels'][length]['allele_fraction']
+
     return msi_site
 
 def calc_wildtype(indels, wildtype_ave_depth, wildtype_fraction, highest_reads): 
@@ -164,12 +168,12 @@ def calc_summary_stats(output_info, cutoff):
             average_depth=int(info['total_depth']/info['total_sites'])
         else:
             average_depth=0
-        #Calculate the wildtype information by comparing mutant depth to average depth
-        if average_depth != 0 and info['mutant_depth'] < info['wildtype_depth']:
+        #Calculate the wildtype info
+        if average_depth != 0 and info['wildtype_depth'] !=0:
             wildtype_fraction=float(info['wildtype_depth'])/info['total_depth']
             wildtype_ave_depth=int(info['wildtype_depth'])/info['total_sites']
         else:
-            wildtype_fraction, wildtype_depth=0,0
+            wildtype_fraction, wildtype_ave_depth=0,0
             sites[0]='0:0:0'
         if info['indels']:
             highest_reads = calc_highest_peak(info['indels'], wildtype_ave_depth, wildtype_fraction)
@@ -230,7 +234,6 @@ def action(args):
     for row in sample_msi:
         loci_name = msi_sites[row['chrom']][int(row['position'])]
         output_info[loci_name].update(calc_msi_dist(row, output_info[loci_name]))
-    print 'output:', output_info
     output.update(calc_summary_stats(output_info, cutoff))
     fieldnames=['Position','Name','Average_Depth','Number_of_Peaks','Standard_Deviation','IndelLength:AlleleFraction:Reads']
 
