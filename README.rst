@@ -1,3 +1,4 @@
+
 ==========================================================================
 mSINGS: Detecting Microsatellite Instability By Next-Generation Sequencing
 ==========================================================================
@@ -17,15 +18,14 @@ Authors:
 
 Dependencies:
 ^^^^^^^^^^^^^
-* Tested on Ubuntu 12.04
+* Tested on Ubuntu 12.04, 14.04
 * Python 2.7.x
-* scons 
 * git
 
 Installation:
 -------------
 Please ensure the dependencies are installed to the system. 
-This pipeline is designed to be run inside its own virtual environment (virtualenv), specified in settings.conf. The following commands will allow you to establish this virtualenv.
+This pipeline is designed to be run inside its own virtual environment (virtualenv). The following commands will allow you to establish this virtualenv.
 
 To install the software to a virtual environment in your current directory, run the following commands:
 
@@ -55,12 +55,6 @@ The devel.sh script builds a local virtualenv and downloads test data (if run fr
 
 If run outside of the UW network, it will not download test data. 
 
-Bash version:
--------------
-If for some reason, you cannot install scons, a bash script is available for running the mSINGS pipeline manually. 
-Please see the 'run_msings.sh' script for further details.
-Note, installation as outlined above via the bootstrap.sh script is still required. 
-
 Required Input files:
 ----------------------
 1. bam file : sample of interest aligned against reference genome, provided in bam format. Index required. 
@@ -73,16 +67,7 @@ Required Input files:
 
 5. msi_intervals : MSI interval file (see example under "doc/mSINGS_TCGA.intervals")  - file for internal program use.  User makes this using msi formatter script.
 
-6. settings.conf : file specifying absolute paths to above files, thresholds for MSI status calling, and control name. Can be specified at the command prompt with:
-
-  >>> scons settings=/path/to/settings.conf
-
-7. data.conf : file specifying absolute paths to bam files to be processed. Can be specified at the command prompt with:
-
-  >>> scons data=/path/to/data.conf
-
 Please note that both your reference genome and bed files MUST follow the convention that chromosomes are numbered numerically or with "X" or "Y" - other names are not supported.
-
 
 Output files:
 -------------
@@ -100,7 +85,7 @@ This protocol will run the pipeline using the baseline file and microsatellite l
  * msi_bed 
  * msi_intervals 
 
-1. Edit the settings.conf to point to the absolute path to the reference fasta used to align this bam:
+1. Edit the to point to the absolute path to the reference fasta used to align this bam:
 
   >>> ref_fasta = /path/to/ref.fasta
     
