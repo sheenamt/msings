@@ -1,58 +1,58 @@
 #!/bin/bash
 
-BAM=$1;
-SAVEPATH=$2
-PFX=$3
+source msings-env/bin/activate
+
 INTERVALS_FILE=doc/mSINGS_TCGA.msi_intervals
 BEDFILE=doc/mSINGS_TCGA.bed
-MSI_BASELINE=$6;
-
-# CHR: REF_GENOME=/mnt/disk2/com/Genomes/hg19_chr/human_g1k_v37.fasta
-REF_GENOME=/mnt/disk2/com/Genomes/gatk-bundle/human_g1k_v37.fasta
-VARSCAN=msings-env/bin/VarScan.v2.3.7.jar
+MSI_BASELINE=doc/mSINGS_TCGA.baseline
+REF_GENOME=$4;
+BAM_LIST=${5:}
 
 #"multiplier" is the number of standard deviations from the baseline that is required to call instability
 multiplier=2.0 
-#"msi_min_threshold" is the minimum fraction of unstable sites allowed to call a specimen MSI negative   
+#"msi_min_threshold" is the maximum fraction of unstable sites allowed to call a specimen MSI negative     
 msi_min_threshold=0.2
-#"msi_max_threshold" is the maximum fraction of unstable sites allowed to call a specimen MSI negative   
+#"msi_max_threshold" is the minimum fraction of unstable sites allowed to call a specimen MSI positive
 msi_max_threshold=0.2
 
-source msings-env/bin/activate
+SAVEPATH=$(dirname $BAM)
 
-mkdir -p $SAVEPATH
+for BAM in $BAM_LIST; do
+    BAMNAME=$(basename $BAM)
+    PFX=${BAMNAME%.}
+    
+    
+    mkdir -p $SAVEPATH/$PFX
 
-echo “Starting Analysis of $PFX” >> $SAVEPATH/msi_run_log.txt;
-date +"%D %H:%M" >> $SAVEPATH/msi_run_log.txt;
+    echo “Starting Analysis of $PFX” >> $SAVEPATH/$PFX/msi_run_log.txt;
+    date +"%D %H:%M" >> $SAVEPATH/$PFX/msi_run_log.txt;
 
-echo "Making mpileups" >> $SAVEPATH/msi_run_log.txt;
-date +"%D %H:%M" >> $SAVEPATH/msi_run_log.txt;
-samtools mpileup -f $REF_GENOME -d 100000 -A -E  $BAM | awk '{if($4 >= 6) print $0}' > $SAVEPATH/$PFX.mpileup 
+    echo "Making mpileups" >> $SAVEPATH/$PFX/msi_run_log.txt;
+    date +"%D %H:%M" >> $SAVEPATH/$PFX/msi_run_log.txt;
+    samtools mpileup -f $REF_GENOME -d 100000 -A -E  $BAM -l $INTERVALS_FILE | awk '{if($4 != 0) print $0}' > $SAVEPATH/$PFX/$PFX.mpileup 
+    
+    echo "Varscan Readcounts start" >> $SAVEPATH/$PFX/msi_run_log.txt;
+    date +"%D %H:%M" >> $SAVEPATH/$PFX/msi_run_log.txt;
+    java -Xmx4g -jar $VARSCAN readcounts $SAVEPATH/$PFX/$PFX.mpileup --variants-file $INTERVALS_FILE --min-base-qual 10 --output-file $SAVEPATH/$PFX/$PFX.msi_output &
+    wait
 
-echo "Varscan Readcounts start" >> $SAVEPATH/msi_run_log.txt;
-date +"%D %H:%M" >> $SAVEPATH/msi_run_log.txt;
-java -Xmx4g -jar $VARSCAN readcounts $SAVEPATH/$PFX.mpileup --variants-file $INTERVALS_FILE --min-base-qual 10 --output-file $SAVEPATH/$PFX.msi_output &
-wait
- 
-echo "MSI Analyzer start" >> $SAVEPATH/msi_run_log.txt;
-date +"%D %H:%M" >> $SAVEPATH/msi_run_log.txt;
+    echo "MSI Analyzer start" >> $SAVEPATH/$PFX/msi_run_log.txt;
+    date +"%D %H:%M" >> $SAVEPATH/$PFXmsi_run_log.txt;
+    
+    msi analyzer $SAVEPATH/$PFX/$PFX.msi_output $BEDFILE -o $SAVEPATH/$PFX/$PFX.msi.txt
+    
+    echo "MSI calls start" >> $SAVEPATH/$PFX/msi_run_log.txt;
+    date +"%D %H:%M" >> $SAVEPATH/$PFX/msi_run_log.txt;
+    
+    msi count_msi_samples $MSI_BASELINE $SAVEPATH/$PFX --multiplier=$multiplier msi_min_threshold=$msi_min_threshold msi_max_threshold=$msi_max_threshold -o $SAVEPATH/$PFX/$PFX.MSI_Analysis.txt
 
-msi analyzer $SAVEPATH/$PFX.msi_output $BEDFILE -o $SAVEPATH/$PFX.msi.txt
+    echo “Completed Analysis of $PFX” >> $SAVEPATH/$PFX/msi_run_log.txt;
+    date +"%D %H:%M" >> $SAVEPATH/$PFX/msi_run_log.txt;
 
-# echo "MSI calls start" >> $SAVEPATH/msi_run_log.txt;
-# date +"%D %H:%M" >> $SAVEPATH/msi_run_log.txt;
+fi
 
-# msi count_msi_samples $MSI_BASELINE $SAVEPATH/$PFX -o $SAVEPATH/$PFX/$PFX.MSI_Analysis.txt
-
-echo “Completed Analysis of $PFX” >> $SAVEPATH/msi_run_log.txt;
-date +"%D %H:%M" >> $SAVEPATH/msi_run_log.txt;
-
-#msi create_baseline /path/to/my_output -o /path/to/CUSTOM_MSI_BASELINE
-exit
-
-#NOTE:
-#command to make "top-level" output, run after all individual samples are done.
-#msi count_msi_samples $MSI_BASELINE $SAVEPATH -o $SAVEPATH/Combined_MSI.txt
+echo "Creating summary analysis file for all samples" >> $SAVEPATH/msi_run_log.txt;
+msi count_msi_samples $MSI_BASELINE $SAVEPATH -o $SAVEPATH/Combined_MSI.txt
 
 
 

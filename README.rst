@@ -61,7 +61,7 @@ Required Input files:
 
 2. ref_fasta : fasta file alignment was created with - in other words, your reference genome.  Must be indexed with bwa for use with samtools program (see below).  Please note that both your reference genome and bed files MUST follow the convention that chromosomes are numbered numerically or with "X" or "Y".  Other conventions (such as those bearing a "chr" prefix) are not supported.
 
-3. msi_bed : MSI bed file (see example under "doc/mSINGS_TCGA.bed") - specifies the locations of the microsatellite tracts of interest.  NOTE:  must be sorted numerically and must not have a header line (see below), and must follow identical naming conventions as the reference genome.
+3. msi_bed : MSI bed file (see example under "doc/mSINGS_TCGA.bed") - specifies the locations of the microsatellite tracts of interest.  NOTE:  must be sorted numerically and must not have a header line (see below), and must follow identical chromosome naming conventions as the reference genome.
 
 4. msi_baseline : MSI baseline file (see example under "doc/mSINGS_TCGA.baseline")  - describes the average and standard deviation of the number of expected signal peaks at each locus, as calculated from an MSI negative population (blood samples or MSI negative tumors).  User generates this file with msi create_baseline script (see below).
 
@@ -78,18 +78,20 @@ For each sample run, the following will be produced:
 
 For the entire run, a "top level" output represented as a binary matrix of interpreted instability (1) or stability (0) at each locus is provided if the count_msi.py function is run. Loci with insufficient coverage for instability calling are left blank. Summary statistics and interpretation of results are provided.
 
-Execution for Exome / TCGA data sets:
+Execution for Exome / TCGA data sets: 
 -------------------------------------
 This protocol will run the pipeline using the baseline file and microsatellite loci identified for TCGA exome data. Files specific for analysis of TCGA exome data are provided in the doc/ directory of this package. 
  * msi_baseline 
  * msi_bed 
  * msi_intervals 
 
-1. Edit the to point to the absolute path to the reference fasta used to align this bam:
+ >>> source /path/to/msings-virtual-environment/bin/activate
 
-  >>> ref_fasta = /path/to/ref.fasta
-    
-2. Optional - Edit the settings.conf to MSI default analytic parameters:
+2. Optional - Edit the run_msings.sh to point to the absolute path of the reference genome used for alignment. If you choose to not edit the script, you will be required to point to this file to execute the script
+
+  >>> REF_GENOME=/path/to/REF_GENOME;
+
+3. Optional - Edit the run_msings.sh to change the MSI default analytic parameters:
  
   >>> multiplier = 2.0 
     "multiplier" is the number of standard deviations from the baseline that is required to call instability
@@ -102,22 +104,20 @@ This protocol will run the pipeline using the baseline file and microsatellite l
 
 * If the fraction of unstable sites falls between the thresholds, the specimen is considered indeterminate.  (By default, no indeterminate calls are permitted) 
 
-3.   Edit the data.conf file by adding the absolute paths of the input bams. This is where you can assign a new name to the sample output files. Output files will have A01 and A02 prefixes in this case:
+4. Create a file of the list of BAMS, with each line being the absolute path to one sample
 
-  >>> [specimen_data] 
-      A01 = /path/to/sample1.final.bam
-      A02 = /path/to/sample2.final.bam
+  >>> /path/to/sampleA.bam
+  >>> /path/to/sampleB.bam
+  >>> /path/to/sampleC.bam
+   
+5. Run the analysis script for the batch of samples. Output will be in subfolders of the BAM data, subfolders named after the samples themselves
 
-4. To test that everything is installed and all inputs are specified correctly, the -n flag can be used: 
+ Default execution:
+ >>>  run_msings.sh REF_GENOME BAM_LIST
 
- >>> scons -n
- >>> scons: Building targets
- >>> <......>
- >>> scons: done building targets.
+ If you already edited the run_msings.sh script to point to your reference files:
+ >>>  run_msings.sh BAM_LIST
 
-5. Run the analysis script for the batch of samples. Output will be in the output directory specified in the settings.conf file, 'output' by default, unless specified at the command prompt
-
- >>>  scons output=name_of_output_folder
 
 Execution for custom data sets:
 -------------------
@@ -130,70 +130,54 @@ NOTE: msi_baseline and msi_bed file must have the same loci ( ie, there are no l
 
 The following instructions will allow users to set up analysis for their custom targets, to generate a custom baseline for those targets, and to run subsequent analysis.  Recommendations for design of custom assays and custom targets are provided in the Recommendations_for_custom_assays.txt file packaged with the repository.
 
-1. Before you begin creating custom files, activate the virtualenv to make use of installed programs:
-  
- >>>  source msings-env/bin/activate
+1. If you installed the virtualenv to a different location that the default scripts, edit the bash scripts to point to your virtual environment
 
-2. Ensure that your bed file is properly formatted.  Delete any header line, if present, then sort the file numerically by chromosome and then by base position:
+ create_intervals.sh:
+ >>> source /path/to/msings-virtual-environment/bin/activate
 
- >>>  sort -V -k1,1 -k2,2n /path/to/CUSTOM_UNSORTED_MSI_BED -o /path/to/CUSTOM_MSI_BED
+ create_baseline.sh:
+ >>> source /path/to/msings-virtual-environment/bin/activate
+
+2. Run the create_intervals.sh bash script to create the msi_intervals file for your custom assay. This will create an msi_intervals file in the same directory as the bed file specified
+
+ >>> create_intervals.sh BEDFILE
 
 3. If necessary, bwa format and create a bwa index for your reference genome:
 
  >>>  bwa index -a bwtsw ref_fasta
 
-4. Create the interval file, providing absolute paths for variables:
+4. Now that we have CUSTOM_MSI_BED and CUSTOM_MSI_INTERVALS, you can update the create_baseline.sh script to point to these
 
- >>> msi formatter /path/to/CUSTOM_MSI_BED -o /path/to/CUSTOM_MSI_INTERVALS
+ >>> INTERVALS_FILE=/path/to/CUSTOM_MSI_INTERVALS;
+ >>> BEDFILE=/path/to/CUSTOM_MSI_BED;
+ >>> REF_GENOME=/path/to/REF_GENOME;
 
-5. Now that we have CUSTOM_MSI_BED and CUSTOM_MSI_INTERVALS, update the settings.conf to reflect these:
+4. Create a file of the list of BAMS of MSI negative specimens, with each line being the absolute path to one sample
 
- >>> msi_bed = /path/to/custom_MSI_BED
- >>> msi_intervals = /path/to/CUSTOM_MSI_INTERVALS
+  >>> /path/to/sampleA.bam
+  >>> /path/to/sampleB.bam
+  >>> /path/to/sampleC.bam
 
-6. Edit the data.conf file to point to the absolute path of the MSI negative specimen BAMS 
+5. Run the create_baseline.sh script for the batch of samples. Output will be in subfolders of the BAM data, subfolders named after the samples themselves
 
- >>> [specimen_data] 
- >>> A01 = /path/to/sample1.final.bam
- >>> A02 = /path/to/sample2.final.bam
+ Default execution:
+ >>>  create_baseline.sh INTERVALS_FILE BEDFILE REF_GENOME BAM_LIST
 
-7. To generate a baseline file from MSI negative specimens, you must first run the program for each MSI negative specimen to include in the baseline file creation. To test the setup for the creation of the msi_calls files, without actually running the pipeline, use the "-n" flag:
-
- >>> scons -n msi_calls
-
- If that produces the expected "scons: done building targets" message, proceed: 
-
- >>> scons msi_calls
-
-8. Use these raw data to produce the the MSI_BASELINE file from MSI negative specimens
-
- >>>  msi create_baseline /path/to/my_output -o /path/to/CUSTOM_MSI_BASELINE
-
+ If you already edited the create_baseline.sh script to point to your reference files:
+ >>> create_baseline.sh BAM_LIST
 
 NOTE: Now that the baseline file has been created, edit the msi_bed file to ensure the same loci are present in both. Loci are excluded from the baseline file if the number of samples are insufficient to calculate statistics. This process only need to be done once per assay/target data set. Files may be saved and re-used for subsequent analyses. 
 
-9. Now we update the settings.conf to point to all the new custom files:
+9. Now we update the run_msings.sh to point to all the new custom files:
 
- >>> msi_bed = /path/to/CUSTOM_MSI_BED
-     msi_intervals = /path/to/CUSTOM_MSI_INTERVALS
-     msi_baseline = /path/to/CUSTOM_MSI_BASELINE
+  >>> INTERVALS_FILE=/path/to/CUSTOM_MSI_INTERVALS;
+  >>> BEDFILE=/path/to/CUSTOM_BEDFILE;
+  >>> MSI_BASELINE=/path/to/CUSTOM_MSI_BASELINE;
+  >>> REF_GENOME=/path/to/REF_GENOME;
  
-Also update the settings.conf file as described in step 1 and [optionally] step 2 for Exome /TCGA data instructions above.
+10. Once the run_msings.sh script is updated for the new custom files, execution is the same as for Exome / TCGA data sets (above). 
 
-10. Once the settings.conf file is updated for the new custom files, execution is the same as for Exome / TCGA data sets (above).  To test that everything is installed and all inputs are specified correctly, the -n flag can be used: 
-
- >>> scons -n 
- >>> scons: Building targets
- >>> <......>
- >>> scons: done building targets.
-
-11. Run the analysis script for the batch of samples. Output will be in the output directory specified in the settings.conf file, 'output' by default
-
- >>> scons 
-
-12. To specify settings.conf, data.conf and output directory to be something other than default:
-
- >>> scons settings=/path/to/settings.conf data=/path/to/data.conf output=name_of_output_folder 
+ >>>  run_msings.sh BAM_LIST
  
 Tests:
 ^^^^^^
