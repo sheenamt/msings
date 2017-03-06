@@ -16,7 +16,7 @@ import natsort
 
 from operator import itemgetter
 from itertools import chain, groupby
-from numpy import std, array
+from numpy import std, array, ceil
 from collections import defaultdict
 from msings.utils import multi_split
 
@@ -114,12 +114,10 @@ def calc_highest_peak(info, wt_ave_reads, wt_fraction):
     """
     highest_reads=wt_ave_reads
     highest_frac=wt_fraction
-
     for loci, details in info.items():
         if details['allele_fraction'] >= highest_frac:
             highest_frac = details['allele_fraction']
             highest_reads = details['mutant_depth']
-
     return highest_reads
 
 def calc_number_peaks(info, sites, highest_reads, cutoff):
@@ -166,13 +164,19 @@ def calc_summary_stats(output_info, cutoff):
     for name, info in output_info.items():
         #Set total average depth for this site
         if info['total_depth']!= 0 and info['total_sites'] != 0:
-            average_depth=int(info['total_depth']/info['total_sites'])
+            #Use ceil to round up
+            average_depth=ceil(float(info['total_depth'])/info['total_sites'])
+            #Turn to int
+            average_depth=int(average_depth)
         else:
             average_depth=0
         #Calculate the wildtype info
         if average_depth != 0 and info['wildtype_depth'] !=0:
             wildtype_fraction=float(info['wildtype_depth'])/info['total_depth']
-            wildtype_ave_depth=int(info['wildtype_depth'])/info['total_sites']
+            #Use ceil to round up 
+            wildtype_ave_depth=ceil(float(info['wildtype_depth'])/info['total_sites'])
+            #Turn to int
+            wildtype_ave_depth=int(wildtype_ave_depth)
         else:
             wildtype_fraction, wildtype_ave_depth=0,0
             sites[0]='0:0:0'
