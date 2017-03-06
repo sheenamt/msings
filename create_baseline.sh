@@ -20,7 +20,7 @@ for BAM in $BAM_LIST; do
 
     echo "Making mpileups" >> $SAVEPATH/msi_run_log.txt;
     date +"%D %H:%M" >> $SAVEPATH/msi_run_log.txt;
-    samtools mpileup -f $REF_GENOME -d 100000 -A -E  $BAM -l $INTERVALS_FILE | awk '{if($4 != 0) print $0}' > $SAVEPATH/$PFX/$PFX.mpileup 
+    samtools mpileup -f $REF_GENOME -d 100000 -A -E  $BAM -l $INTERVALS_FILE | awk '{if($4 >= 6) print $0}' > $SAVEPATH/$PFX/$PFX.mpileup 
     
     echo "Varscan Readcounts start" >> $SAVEPATH/msi_run_log.txt;
     date +"%D %H:%M" >> $SAVEPATH/msi_run_log.txt;
