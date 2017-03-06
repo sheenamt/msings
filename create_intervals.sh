@@ -4,10 +4,13 @@ source msings-env/bin/activate
 
 BEDFILE=$1;
 
-# get basename of bedfile
-BEDBASE=
 # get path of bedfile
-BEDPATH=
+BEDPATH=$(dirname $BEDFILE)
+
+# get basename of bedfile
+BED=$(basename $BEDFILE)
+BEDBASE=${BED%.*}
+
 # create pfx of interval file
 MSI_INTERVALS=$BEDPATH/$BEDBASE.msi_intervals
 
@@ -15,9 +18,9 @@ echo "Sorting MSI bed file"
 
 sort $BEDFILE  >> $BEDPATH/$BEDBASE.sorted.bed
 
-echo "Making MSI intervals file" 
+echo "Making MSI intervals file $MSI_INTERVALS" 
 
-msi formatter $BEDPATH/$BEDBASE.sorted.bed -o $MSI_INTERVALS
+msi formatter $BEDPATH/$BEDBASE.sorted.bed $MSI_INTERVALS
 
 echo "Created $MSI_INTERVALS"
 
