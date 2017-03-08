@@ -95,13 +95,13 @@ This protocol will run the pipeline using the baseline file and microsatellite l
 
 3. OPTIONAL - Edit the run_msings.sh to change the MSI default analytic parameters:
  
->>> multiplier = 2.0 
+>>> multiplier=2.0 
     "multiplier" is the number of standard deviations from the baseline that is required to call instability
    
->>> msi_min_threshold = 0.2
+>>> msi_min_threshold=0.2
     "msi_min_threshold" is the maximum fraction of unstable sites allowed to call a specimen MSI negative   
 
->>> msi_max_threshold = 0.2
+>>> msi_max_threshold=0.2
     "msi_max_threshold" is the minimum fraction of unstable sites allowed to call a specimen MSI positive
 
 * If the fraction of unstable sites falls between the thresholds, the specimen is considered indeterminate.  (By default, no indeterminate calls are permitted) 
@@ -115,9 +115,9 @@ This protocol will run the pipeline using the baseline file and microsatellite l
 5. Run the analysis script for the batch of samples. Output will be in subfolders of the same directories containing the BAM data, subfolders are named after the samples themselves
 
 Default execution:
->>>  scripts/run_msings.sh PATH/TO/REF_GENOME PATH/TO/BAM_LIST
+>>>  scripts/run_msings.sh PATH/TO/BAM_LIST PATH/TO/INTERVALS_FILE PATH/TO/BEDFILE PATH/TO/REF_GENOME PATH/TO/MSI_BASELINE
 
-If you already edited the run_msings.sh script to point to your reference files, script may be run as follows:
+If you already edited the run_msings.sh script to point to the reference files (either yours or the TCGA files in the doc/ folder), script may be run as follows:
 >>>  scripts/run_msings.sh PATH/TO/BAM_LIST
 
 Execution for custom data sets:
@@ -168,7 +168,7 @@ scripts/run_msings.sh:
 5. Create the baseline. Run the create_baseline.sh script for the batch of samples. Output will be in subfolders of the BAM data, subfolders named after the samples themselves
 
 Default execution:
->>>  scripts/create_baseline.sh PATH/TO/INTERVALS_FILE PATH/TO/BEDFILE PATH/TO/REF_GENOME PATH/TO/BAM_LIST
+>>> scripts/create_baseline.sh PATH/TO/BAM_LIST PATH/TO/INTERVALS_FILE PATH/TO/BEDFILE PATH/TO/REF_GENOME
 
 If you already edited the create_baseline.sh script to point to your reference files, you can instead just run:
 >>> scripts/create_baseline.sh PATH/TO/BAM_LIST
@@ -188,8 +188,8 @@ The baseline contstruction process only need to be done once per assay/target da
 10. Once the run_msings.sh script is updated for the new custom files, execution is the same as for Exome / TCGA data sets (above). 
 
 Default execution:
->>>  scripts/run_msings.sh PATH/TO/INTERVALS_FILE PATH/TO/BEDFILE PATH/TO/REF_GENOME PATH/TO/MSI_BASELINE PATH/TO/VARSCAN PATH/TO/BAM_LIST
- 
+>>>  scripts/run_msings.sh PATH/TO/BAM_LIST PATH/TO/INTERVALS_FILE PATH/TO/BEDFILE PATH/TO/REF_GENOME PATH/TO/MSI_BASELINE
+
 If you already edited the create_baseline.sh script to point to your reference files:
 >>>  scripts/run_msings.sh PATH/TO/BAM_LIST
 
