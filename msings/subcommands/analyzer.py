@@ -16,10 +16,9 @@ import natsort
 
 from operator import itemgetter
 from itertools import chain, groupby
-from numpy import std, array
+from numpy import std, array, ceil
 from collections import defaultdict
 from msings.utils import multi_split
-
 
 def build_parser(parser):
     parser.add_argument('msi_file', 
@@ -38,85 +37,108 @@ def build_parser(parser):
                         type=float,
                         help='Peak fraction cutoff. Default of 0.05')
 
-
-def calc_msi_dist(site_info,msi_sites):
+def calc_msi_dist(variant,msi_site):
     """
     Compute statistics for each site in sample
     """
     # for variant in msi_sites:
     info={}
-    for variant in site_info:
-        #Grab all the deletions
-        dels = filter(lambda s: "DEL" in str(s), variant['Misc'])
-        #And all the insertions
-        ins =  filter(lambda s: "INS" in str(s), variant['Misc'])
-        sites=dels + ins
-        for key in msi_sites.keys():
-            #If this is an MSI loci, proceed
-            if int(variant['position']) in msi_sites[key]['range']:
-                #Want total depth to reflect all sites, not just DEL/INS
-                msi_sites[key]['total_depth']+=int(variant['q10_depth'])
-                msi_sites[key]['site_depth']=int(variant['q10_depth'])
-                #Keep tally of sites seen
-                msi_sites[key]['total_sites']+=1
-                #Now process DEL/INS specific info
-                #Parse the obvious variant format: 'DEL-3-AAA:1:1:23:1:1:0'
-                for entry in sites:
-                    info=multi_split(entry.strip(), ":-")
-                    if info[0]=='DEL':
-                        length=int(info[1])*int(-1)
-                    elif info[0]=='INS':
-                        length=int(info[1])
-                    reads=int(info[3])
-                    #Want a total mutant depth for this loci 
-                    msi_sites[key]['mutant_depth']=msi_sites[key]['mutant_depth']+reads
-                    #Keep tally of mutants seen 
-                    msi_sites[key]['mutant_tally']+=1
-                    #If we haven't seen this length of mutation, add it
-                    try:
-                        allele_fraction=reads/float(msi_sites[key]['site_depth'])
-                    except ZeroDivisionError:
-                        allele_fraction=0.0
-                    if not length in msi_sites[key]['indels'].keys():
-                        msi_sites[key]['indels'][length]={'allele_fraction':allele_fraction}
-                        msi_sites[key]['indels'][length]['mutant_depth']=reads
-                    #Otherwise, update the counts for this mutation length
-                    else:    
-                        msi_sites[key]['indels'][length]['allele_fraction']=msi_sites[key]['indels'][length]['allele_fraction']+allele_fraction
-                        msi_sites[key]['indels'][length]['mutant_depth']=msi_sites[key]['indels'][length]['mutant_depth']+reads
-    return msi_sites
+    #reference/WT info:
+    wildtype_reads=variant['base:reads:strands:avg_qual:map_qual:plus_reads:minus_reads'].split(':')[1]
+    msi_site['wildtype_depth']+=int(wildtype_reads)
+    #Grab all the deletions
+    dels = filter(lambda s: "DEL" in str(s), variant['Misc'])
+    #And all the insertions
+    ins =  filter(lambda s: "INS" in str(s), variant['Misc'])
+    sites=dels + ins
 
-def calc_wildtype(info, wildtype_depth, wildtype_fraction):
+    #Want total depth to reflect all sites, not just DEL/INS
+    msi_site['total_depth']+=int(variant['q10_depth'])
+    msi_site['site_depth']=int(variant['q10_depth'])
+    #Keep tally of sites seen
+    msi_site['total_sites']+=1
+
+    #Now process DEL/INS specific info
+    #Parse the obvious variant format: 'DEL-3-AAA:1:1:23:1:1:0'
+    for entry in sites:
+        info=multi_split(entry.strip(), ":-")
+        if info[0]=='DEL':
+            length=int(info[1])*int(-1)
+        elif info[0]=='INS':
+            length=int(info[1])
+        reads=int(info[3])
+        #Want a total mutant depth for this loci 
+        msi_site['mutant_depth']=msi_site['mutant_depth']+reads
+        #Keep tally of mutants seen 
+        msi_site['mutant_tally']+=1
+        #If we haven't seen this length of mutation, add it
+        if not length in msi_site['indels'].keys():
+            try:
+                allele_fraction=reads/float(msi_site['site_depth'])
+            except ZeroDivisionError:
+                allele_fraction=0.0
+            msi_site['indels'][length]={'allele_fraction':allele_fraction}
+            msi_site['indels'][length]['site_depth']=int(variant['q10_depth'])
+            msi_site['indels'][length]['mutant_depth']=reads
+            msi_site['indels'][length]['mutant_tally']=1
+            #Otherwise, update the counts for this mutation length
+        else:   
+            msi_site['indels'][length]['mutant_tally']+=1
+            msi_site['indels'][length]['site_depth']+=int(variant['q10_depth'])
+            msi_site['indels'][length]['mutant_depth']=msi_site['indels'][length]['mutant_depth']+reads
+            try:
+                msi_site['indels'][length]['allele_fraction']=float(msi_site['indels'][length]['mutant_depth'])/msi_site['indels'][length]['site_depth']
+            except ZeroDivisionError:
+                msi_site['indels'][length]['allele_fraction']=msi_site['indels'][length]['allele_fraction']
+
+    return msi_site
+
+def calc_wildtype(indels, wildtype_ave_depth, wildtype_fraction, highest_reads): 
     """
+    Set up wildtype info and empty values for each indel length
     """
-    mx=int(max(info.keys()))+1
-    mn=int(min(info.keys()))
-    wildtype=":".join([str(0), str(wildtype_fraction), str(wildtype_depth)])
+    mx=int(max(indels))+1
+    mn=int(min(indels))
+    wt_frac = float(wildtype_ave_depth)/highest_reads
+    wildtype=":".join([str(0), str(wt_frac), str(wildtype_ave_depth)])
     sites={0:wildtype}
 
     for key in range(mn,mx):
         if key not in sites.keys():
             sites[key]=str(key)+':0:0'
-            
     return sites
-        
-def calc_number_peaks(info, sites, cutoff):
+
+def calc_highest_peak(info, wt_ave_reads, wt_fraction):
+    """
+    Calculate the highest peak
+    """
+    highest_reads=wt_ave_reads
+    highest_frac=wt_fraction
+    for loci, details in info.items():
+        if details['allele_fraction'] >= highest_frac:
+            highest_frac = details['allele_fraction']
+            highest_reads = details['mutant_depth']
+    return highest_reads
+
+def calc_number_peaks(info, sites, highest_reads, cutoff):
     """
     Calculate the number of peaks that are above cutoff
     """
-    peaks=0
+    peaks =0
     for loci, details in info.items():
-        peak=":".join([str(loci), str(details['allele_fraction']), str(details['mutant_depth'])])
+        #take highest allele fraction and divide each alele fraction by that number
+        allele_fraction = float(details['mutant_depth'])/highest_reads
+        peak=":".join([str(loci), str(allele_fraction), str(details['mutant_depth'])])
         #Overwrite this site if the allele fraction is more than the cutoff
         sites[loci]=peak
-        if details['allele_fraction']>= cutoff:
+        if allele_fraction>= cutoff:
             peaks+=1
-
     #wildtype is sites[0], if fraction is above cutoff, it counts as a peak
     if sites[0].split(':')[1] >= cutoff:
         peaks+=1
+
     return peaks, sites
-    
+
 def calc_std_peaks(peaks):
     """Calculate the standard deviation of the alleles
     """
@@ -133,94 +155,95 @@ def calc_std_peaks(peaks):
     
     return stddev
 
-def calc_summary_stats(msi_sites, cutoff):
+def calc_summary_stats(output_info, cutoff):
     """Calculate average read depth, number of peaks, standard
     deviation and report each peak for each msi range in the bed file
     """
-    output={}
-    msi_sites=msi_sites
     sites={}
     #msi_info is all loci for this chromosome
-    for chrom, msi_info in msi_sites.items():
-        #info is the site specific information
-        for loci, info in msi_info.items():
-            #create position for output file
-            position=chrom+':'+info['start']+'-'+info['end']
-            #Set total average depth for this site
-            if info['total_depth']!= 0 and info['total_sites'] != 0:
-                average_depth=int(info['total_depth']/info['total_sites'])
-            else:
-                average_depth=0
-            #Calculate the wildtype information by comparing mutant depth to average depth
-            if average_depth != 0 and info['mutant_depth'] < average_depth:
-                wildtype_fraction=float(average_depth-info['mutant_depth'])/average_depth
-                wildtype_depth=int(average_depth-info['mutant_depth'])
-            else:
-                wildtype_fraction, wildtype_depth=0,0
-                sites[0]='0:0:0'
-            if info['indels']:
-                sites=calc_wildtype(info['indels'], wildtype_depth, wildtype_fraction)
-                num_peaks, peaks=calc_number_peaks(info['indels'], sites, cutoff)
-                stdev=calc_std_peaks(peaks.values())
-                #Sort the peak list naturally (-3,-2,-1,0,1,2,3)
-                peak_list=(" ").join(str(x) for x in natsort.natsorted(peaks.values()))
-            else:
-                #if there are no indels, its a wiltype call
-                wildtype_fraction=1
-                wildtype_depth=info['total_depth']
-                sites[0]=(":").join(['0', str(wildtype_fraction),str(wildtype_depth)])
-                num_peaks=1
-                peak_list=sites[0]
-                stdev=0
-            output[position]={'Name':info['name'],
-                              'Average_Depth':average_depth,
-                              'Total_Depth':info['total_depth'],
-                              'Total_Sites':info['total_sites'],
-                              'Wildtype_Fraction':wildtype_fraction,
-                              'Wildtype_Depth':wildtype_depth,
-                              'Standard_Deviation':stdev,
-                              'Mutant_Tally':info['mutant_tally'],
-                              'Number_of_Peaks':num_peaks,
-                              'IndelLength:AlleleFraction:Reads':peak_list}
-    return output
+    for name, info in output_info.items():
+        #Set total average depth for this site
+        if info['total_depth']!= 0 and info['total_sites'] != 0:
+            #Use ceil to round up
+            average_depth=ceil(float(info['total_depth'])/info['total_sites'])
+            #Turn to int
+            average_depth=int(average_depth)
+        else:
+            average_depth=0
+        #Calculate the wildtype info
+        if average_depth != 0 and info['wildtype_depth'] !=0:
+            wildtype_fraction=float(info['wildtype_depth'])/info['total_depth']
+            #Use ceil to round up 
+            wildtype_ave_depth=ceil(float(info['wildtype_depth'])/info['total_sites'])
+            #Turn to int
+            wildtype_ave_depth=int(wildtype_ave_depth)
+        else:
+            wildtype_fraction, wildtype_ave_depth=0,0
+            sites[0]='0:0:0'
+        if info['indels']:
+            highest_reads = calc_highest_peak(info['indels'], wildtype_ave_depth, wildtype_fraction)
+            sites=calc_wildtype(info['indels'].keys(), wildtype_ave_depth, wildtype_fraction, highest_reads)
+            num_peaks, peaks=calc_number_peaks(info['indels'], sites, highest_reads, cutoff)
+            stdev=calc_std_peaks(peaks.values())
+            #Sort the peak list naturally (-3,-2,-1,0,1,2,3)
+            peak_list=(" ").join(str(x) for x in natsort.natsorted(peaks.values()))
+        else:
+            #if there are no indels, its a wiltype call
+            wildtype_fraction=1
+            wildtype_depth=info['total_depth']
+            sites[0]=(":").join(['0', str(float(wildtype_fraction)), str(wildtype_ave_depth)])
+            num_peaks=1
+            peak_list=sites[0]
+            stdev=0
+        output_info[name]={'Name':info['Name'],
+                           'Average_Depth':average_depth,
+                           'Standard_Deviation':stdev,
+                           'Number_of_Peaks':num_peaks,
+                           'IndelLength:AlleleFraction:Reads':peak_list}
+    return output_info
     
-
-def parse_msi_bedfile(row, msi_sites):
-    msi_loci=row['start']+"-"+row['end']
+def parse_msi_bedfile(row, msi_sites, output_info):
+    """Create two dictionaries from bedfile
+    one maps positions to name of loci
+    one is output info for each loci
+    """
+    msi_loci=row['chrom']+':'+row['start']+"-"+row['end']
     #Create chrom dictionary if not already present
     if not row['chrom'] in msi_sites.keys():
         msi_sites[row['chrom']]={}
-    #Update msi-loci info for later use
-    msi_sites[row['chrom']][msi_loci]={'start':row['start'],
-                                       'end':row['end'],
-                                       'name':row['name'],
-                                       'total_depth':0,
-                                       'total_sites':0,
-                                       'mutant_depth':0,
-                                       'mutant_tally':0,
-                                       'indels':{},
-                                       'range':set()}
-    #Add range of this chromosome for membership testing
-    msi_sites[row['chrom']][msi_loci]['range'].update(range(int(row['start']),int(row['end']) + 1))
-    return msi_sites
+
+    for position in xrange(int(row['start']),int(row['end'])+1):
+        msi_sites[row['chrom']][position] = msi_loci
+
+    output_info[msi_loci]={'Name':row['name'],
+                           'wildtype_depth':0,
+                           'total_depth':0,
+                           'total_sites':0,
+                           'mutant_depth':0,
+                           'mutant_tally':0,
+                           'indels':{}}
     
+    return msi_sites, output_info
+
 def action(args):
     msifile, bedfile, outfile = args.msi_file,args.bedfile, args.outfile
     # prepare a dictionary of chromosome: {range:set(),msi_range:{'start':'1','end':'20'}}
     # can test for membership efficiently
     cutoff=args.peak_fraction_cutoff
     msi_sites={}
-    output={}
+    output_info={}
+    output = {}
     for row in csv.DictReader(args.bedfile, delimiter='\t', fieldnames=['chrom','start','end','name']):
-        msi_sites.update(parse_msi_bedfile(row, msi_sites))
+        msi_sites, output_info = parse_msi_bedfile(row, msi_sites, output_info)
+        
     # now we start processing the sample msi info
     sample_msi=csv.DictReader(args.msi_file, delimiter='\t', restkey='Misc')
-    msi_info = sorted(sample_msi, key=itemgetter('chrom'))
-    #Evaluate the sample-info vs msi-bed info, grouping on chromosome. 
-    for chrom, site_info in groupby(msi_info, key=itemgetter('chrom')):
-        msi_sites[chrom].update(calc_msi_dist(site_info, msi_sites[chrom]))
-    output.update(calc_summary_stats(msi_sites, cutoff))
 
+    #Evaluate the sample-info vs msi-bed info, grouping on chromosome. 
+    for row in sample_msi:
+        loci_name = msi_sites[row['chrom']][int(row['position'])]
+        output_info[loci_name].update(calc_msi_dist(row, output_info[loci_name]))
+    output.update(calc_summary_stats(output_info, cutoff))
     fieldnames=['Position','Name','Average_Depth','Number_of_Peaks','Standard_Deviation','IndelLength:AlleleFraction:Reads']
 
     writer = csv.DictWriter(args.outfile, fieldnames = fieldnames,  extrasaction = 'ignore', delimiter = '\t')
@@ -228,3 +251,4 @@ def action(args):
     for key, row in natsort.natsorted(output.iteritems()):
        writer.writerow(dict(row, **{'Position': key}))
     
+
