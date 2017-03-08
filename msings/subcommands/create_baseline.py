@@ -59,12 +59,12 @@ def action(args):
     for pth in files:
         with open(os.path.join(pth.dir, pth.fname)) as fname:
             reader = csv.DictReader(fname, delimiter='\t')
-            reader = sorted(reader, key=itemgetter('Position'))
-            for k, g in groupby(reader, key=itemgetter('Position')):
+            info = sorted(reader, key=itemgetter('Position'))
+            for k, g in groupby(info, key=itemgetter('Position')):
                 for row in g:
                     if int(row['Average_Depth']) >= 30:
                         control[row['Position']].append(int(row['Number_of_Peaks']))
-    header = ['Position', 'Standard_Deviation', 'Average', 'Count']
+    header = ['Position', 'Standard_Deviation', 'Average_Number_Peaks', 'Count']
     writer = csv.writer(args.outfile, quoting=csv.QUOTE_MINIMAL, delimiter='\t')
     writer.writerow(header)
     for k, v in natsort.natsorted(control.items()):

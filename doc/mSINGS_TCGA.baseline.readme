@@ -1,0 +1,17 @@
+The following TCGA samples were used for the baseline calculation:
+TCGA-A6-5656-10A
+TCGA-A6-5664-10A
+TCGA-A6-6780-10A
+TCGA-AY-6197-10A
+TCGA-AZ-4315-10A
+TCGA-AZ-4323-10A
+TCGA-AZ-4681-10A
+TCGA-CM-4744-10A
+TCGA-CM-4748-10A
+TCGA-CM-4750-10A
+TCGA-D5-6931-10A
+TCGA-F4-6463-10A
+TCGA-G4-6298-10A
+
+After running the create_baseline script, all positions with Standard Deviation of 0.0 were removed (49 lines in this case).
+
