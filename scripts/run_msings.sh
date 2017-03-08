@@ -2,13 +2,13 @@
 
 source msings-env/bin/activate
 
-INTERVALS_FILE=doc/mSINGS_TCGA.msi_intervals
-BEDFILE=doc/mSINGS_TCGA.bed
-REF_GENOME=/mnt/disk2/com/Genomes/gatk-bundle/human_g1k_v37.fasta
-MSI_BASELINE=doc/MSI_BASELINE.txt
+INTERVALS_FILE=$1;
+BEDFILE=$2;
+REF_GENOME=$3;
+MSI_BASELINE=$4;
 VARSCAN=msings-env/bin/VarScan.v2.3.7.jar
 #BAM_LIST is a file of absolute paths to each bam file
-BAM_LIST=$1
+BAM_LIST=$5
 
 
 #"multiplier" is the number of standard deviations from the baseline that is required to call instability
