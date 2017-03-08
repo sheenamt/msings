@@ -35,7 +35,7 @@ for BAM in $BAM_LIST; do
 echo "Creating baseline of all files" >> $SAVEPATH/msi_run_log.txt;
 date +"%D %H:%M" >> $SAVEPATH/msi_run_log.txt;
 
-msi create_baseline
+msi create_baseline $SAVEPATH -o $SAVEPATH/MSI_BASELINE.txt
 
 echo “Completed Analysis of $PFX” >> $SAVEPATH/msi_run_log.txt;
 date +"%D %H:%M" >> $SAVEPATH/msi_run_log.txt;
