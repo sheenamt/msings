@@ -16,7 +16,7 @@ MSI_INTERVALS=$BEDPATH/$BEDBASE.msi_intervals
 
 echo "Sorting MSI bed file"
 
-sort $BEDFILE  >> $BEDPATH/$BEDBASE.sorted.bed
+sort -V -k1,1 -k2,2n $BEDFILE  >> $BEDPATH/$BEDBASE.sorted.bed
 
 echo "Making MSI intervals file $MSI_INTERVALS" 
 
