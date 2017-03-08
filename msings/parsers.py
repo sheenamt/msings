@@ -41,10 +41,13 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
             sample_msi = natsort.natsorted(reader, key=itemgetter('Position'))
             for key, group in groupby(sample_msi, key=itemgetter('Position')):
                 control_row=[d for d in control_info if d['Position']==key]
-                variant = tuple(control_row[0][k] for k in variant_keys)    
+                try:
+                    variant = tuple(control_row[0][k] for k in variant_keys)    
+                except IndexError:
+                    continue
                 for sample_info in group:
                     if int(sample_info['Average_Depth']) >= 30:
-                        value = float(control_row[0]['Average']) + (multiplier * float(control_row[0]['Standard_Deviation']))
+                        value = float(control_row[0]['Average_Number_Peaks']) + (multiplier * float(control_row[0]['Standard_Deviation']))
                         if int(sample_info['Number_of_Peaks']) >= value:
                             new_info = 1
                         else:
