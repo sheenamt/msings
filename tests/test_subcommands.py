@@ -58,7 +58,7 @@ MSI_SITE_DATA={'1:1-5': {'site_depth': 100, 'total_depth': 500, 'wildtype_depth'
 
 OUTPUT = {'1:1-5': {'IndelLength:AlleleFraction:Reads': '0:1.0:100', 'Standard_Deviation': 0, 'Average_Depth': 100, 'Number_of_Peaks': 1, 'Name': 'NAME1'}, 
           '7:7-11': {'IndelLength:AlleleFraction:Reads': '0:1.0:0', 'Standard_Deviation': 0, 'Average_Depth': 0, 'Number_of_Peaks': 1, 'Name': 'NAME4'}, 
-          '7:1-5': {'IndelLength:AlleleFraction:Reads': '-1:0.0363636363636:4 0:0.245454545455:27 1:1.0:110', 'Standard_Deviation': '0.493303', 'Average_Depth': 50, 'Number_of_Peaks': 2, 'Name': 'NAME3'}, 
+          '7:1-5': {'IndelLength:AlleleFraction:Reads': '-1:0.0363636363636:4 0:0.254545454545:28 1:1.0:110', 'Standard_Deviation': '0.495567', 'Average_Depth': 50, 'Number_of_Peaks': 2, 'Name': 'NAME3'}, 
           '1:7-11': {'IndelLength:AlleleFraction:Reads': '-3:0.380952380952:16 -2:0:0 -1:0:0 0:1.0:42 1:0.333333333333:14', 'Standard_Deviation': '1.404084', 'Average_Depth': 100, 'Number_of_Peaks': 3, 'Name': 'NAME2'}}
 
 class TestFormatter(TestBase):
