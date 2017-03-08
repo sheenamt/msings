@@ -6,7 +6,7 @@ INTERVALS_FILE=$1;
 BEDFILE=$2;
 REF_GENOME=$3;
 #BAM_LIST is a file of absolute paths to each bam file
-BAM_LIST=${4:}
+BAM_LIST=$4
 
 mkdir -p $SAVEPATH
 
