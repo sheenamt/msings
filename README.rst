@@ -1,4 +1,3 @@
-
 ==========================================================================
 mSINGS: Detecting Microsatellite Instability By Next-Generation Sequencing
 ==========================================================================
@@ -63,7 +62,7 @@ Required Input files:
 
 3. msi_bed : MSI bed file (see example under "doc/mSINGS_TCGA.bed") - specifies the locations of the microsatellite tracts of interest.  NOTE:  must be sorted numerically and must not have a header line (see below), and must follow identical chromosome naming conventions as the reference genome.
 
-4. msi_baseline : MSI baseline file (see example under "doc/mSINGS_TCGA.baseline")  - describes the average and standard deviation of the number of expected signal peaks at each locus, as calculated from an MSI negative population (blood samples or MSI negative tumors).  User generates this file with msi create_baseline script (see below).
+4. msi_baseline : MSI baseline file (see example under "doc/mSINGS_TCGA.baseline")  - describes the average and standard deviation of the number of expected signal peaks at each locus, as calculated from an MSI negative population (blood samples or MSI negative tumors).  User generates this file with msi create_baseline script (see below).  IMPORTANT NOTE:  Baseline statistics vary markedly from assay-to-assay and lab-to-lab.  It is CRITICAL that you prepare a baseline file that is specific for your analytic process, and for which data has been generated using the same protocols. 
 
 5. msi_intervals : MSI interval file (see example under "doc/mSINGS_TCGA.intervals")  - file for internal program use.  User makes this using msi formatter script.
 
