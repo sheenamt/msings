@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source msings-env/bin/activate
-
+VARSCAN=msings-env/bin/VarScan.v2.3.7.jar
 #BAM_LIST is a file of absolute paths to each bam file
 BAM_LIST=$1
 INTERVALS_FILE=$2;
