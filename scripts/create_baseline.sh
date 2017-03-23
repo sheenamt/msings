@@ -1,19 +1,19 @@
 #!/bin/bash
 
 source msings-env/bin/activate
-
+VARSCAN=msings-env/bin/VarScan.v2.3.7.jar
 #BAM_LIST is a file of absolute paths to each bam file
 BAM_LIST=$1
 INTERVALS_FILE=$2;
 BEDFILE=$3;
 REF_GENOME=$4;
 
-mkdir -p $SAVEPATH
-
-for BAM in $BAM_LIST; do
+for BAM in `sed '/^$/d' $BAM_LIST`; do
     SAVEPATH=$(dirname $BAM)
     BAMNAME=$(basename $BAM)
-    PFX=${BAMNAME%.}
+    PFX=${BAMNAME%.*}
+
+    mkdir -p $SAVEPATH/$PFX
 
     echo “Starting Analysis of $PFX” >> $SAVEPATH/msi_run_log.txt;
     date +"%D %H:%M" >> $SAVEPATH/msi_run_log.txt;
@@ -31,6 +31,8 @@ for BAM in $BAM_LIST; do
     date +"%D %H:%M" >> $SAVEPATH/msi_run_log.txt;
 
     msi analyzer $SAVEPATH/$PFX/$PFX.msi_output $BEDFILE -o $SAVEPATH/$PFX/$PFX.msi.txt
+
+done
 
 echo "Creating baseline of all files" >> $SAVEPATH/msi_run_log.txt;
 date +"%D %H:%M" >> $SAVEPATH/msi_run_log.txt;
