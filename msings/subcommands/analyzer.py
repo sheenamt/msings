@@ -45,7 +45,9 @@ def calc_msi_dist(variant,msi_site):
     info={}
     #reference/WT info:
     wildtype_reads=variant['base:reads:strands:avg_qual:map_qual:plus_reads:minus_reads'].split(':')[1]
-    msi_site['wildtype_depth']+=int(wildtype_reads)
+    msi_site['total_wildtype_depth']+=int(wildtype_reads)
+    if int(wildtype_reads) >0:
+        msi_site['wildtype_tally']+=1
     #Grab all the deletions
     dels = filter(lambda s: "DEL" in str(s), variant['Misc'])
     #And all the insertions
@@ -171,10 +173,10 @@ def calc_summary_stats(output_info, cutoff):
         else:
             average_depth=0
         #Calculate the wildtype info
-        if average_depth != 0 and info['wildtype_depth'] !=0:
-            wildtype_fraction=float(info['wildtype_depth'])/info['total_depth']
+        if average_depth != 0 and info['total_wildtype_depth'] !=0:
+            wildtype_fraction=float(info['total_wildtype_depth'])/info['total_depth']
             #Use ceil to round up 
-            wildtype_ave_depth=ceil(float(info['wildtype_depth'])/info['total_sites'])
+            wildtype_ave_depth=ceil(float(info['total_wildtype_depth'])/info['wildtype_tally'])
             #Turn to int
             wildtype_ave_depth=int(wildtype_ave_depth)
         else:
@@ -190,7 +192,7 @@ def calc_summary_stats(output_info, cutoff):
         else:
             #if there are no indels, its a wiltype call
             wildtype_fraction=1
-            wildtype_depth=info['total_depth']
+            wildtype_depth=info['total_wildtype_depth']
             sites[0]=(":").join(['0', str(float(wildtype_fraction)), str(wildtype_ave_depth)])
             num_peaks=1
             peak_list=sites[0]
@@ -216,7 +218,8 @@ def parse_msi_bedfile(row, msi_sites, output_info):
         msi_sites[row['chrom']][position] = msi_loci
 
     output_info[msi_loci]={'Name':row['name'],
-                           'wildtype_depth':0,
+                           'total_wildtype_depth':0,
+                           'wildtype_tally':0,
                            'total_depth':0,
                            'total_sites':0,
                            'mutant_depth':0,
