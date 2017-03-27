@@ -15,3 +15,23 @@ TCGA-G4-6298-10A
 
 After running the create_baseline script, all positions with Standard Deviation of 0.0 were removed (49 lines in this case).
 
+To validate new baseline, the follow samples were run:
+MSI_NEGATIVE:
+TCGA-AZ-4308-01A-01D-1408-10_Illumina
+TCGA-AZ-4315-01A-01D-1408-10_hg19_Illumina
+TCGA-AZ-4614-01A-01D-1408-10_Illumina
+TCGA-AZ-4684-01A-01D-1408-10_Illumina
+TCGA-CA-5256-01A-01D-1408-10_Illumina
+TCGA-CM-4744-01A-01D-1408-10_hg19_Illumina
+TCGA-CM-4747-01A-01D-1408-10_hg19_Illumina
+TCGA-CM-4748-01A-01D-1408-10_hg19_Illumina
+TCGA-CM-4750-01A-01D-1408-10_hg19_Illumina
+TCGA-CM-4752-01A-01D-1408-10_hg19_Illumina
+TCGA-CM-5341-01A-01D-1408-10_hg19_Illumina
+TCGA_MC3.TCGA-AA-A02Y-01A-43W-A096-10
+
+MSI_POSITIVE:
+TCGA-AZ-4313-01A-01D-1408-10_Illumina
+TCGA-AZ-4615-01A-01D-1408-10_Illumina
+TCGA-CM-4746-01A-01D-1408-10_hg19_Illumina
+TCGA_MC3.TCGA-CK-4951-01A-01D-1408-10
