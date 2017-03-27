@@ -54,8 +54,7 @@ def action(args):
     files = ifilter(msi_file_finder, walker(args.path))
     #sort the files so that the output in the workbook is sorted
     files = sorted(files)
-    
-    count = 0
+
     for pth in files:
         with open(os.path.join(pth.dir, pth.fname)) as fname:
             reader = csv.DictReader(fname, delimiter='\t')
