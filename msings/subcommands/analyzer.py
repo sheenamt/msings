@@ -101,7 +101,7 @@ def calc_wildtype(indels, wildtype_ave_depth, wildtype_fraction, highest_frac):
     try:
         wt_frac = float(wildtype_fraction)/highest_frac
     except ZeroDivisionError:
-        wt_frac = wildtype_fraction
+        wt_frac = float(wildtype_fraction)
     wildtype=":".join([str(0), str(wt_frac), str(wildtype_ave_depth)])
     sites={0:wildtype}
 
@@ -110,7 +110,7 @@ def calc_wildtype(indels, wildtype_ave_depth, wildtype_fraction, highest_frac):
             sites[key]=str(key)+':0:0'
     return sites
 
-def calc_highest_peak(info, wt_ave_reads, wt_fraction):
+def calc_highest_peak(info, wt_fraction):
     """
     Calculate the highest peak
     """
@@ -124,7 +124,7 @@ def calc_number_peaks(info, sites, highest_frac, cutoff):
     """
     Calculate the number of peaks that are above cutoff
     """
-    peaks =0
+    peaks=0
     for loci, details in info.items():
         #take highest allele fraction and divide each alele fraction by that number
         try:
@@ -137,9 +137,8 @@ def calc_number_peaks(info, sites, highest_frac, cutoff):
         if allele_fraction>= cutoff:
             peaks+=1
     #wildtype is sites[0], if fraction is above cutoff, it counts as a peak
-    if sites[0].split(':')[1] >= cutoff:
+    if float(sites[0].split(':')[1]) >= cutoff:
         peaks+=1
-
     return peaks, sites
 
 def calc_std_peaks(peaks):
@@ -152,7 +151,6 @@ def calc_std_peaks(peaks):
         for i in range (0,int(allele[2])):
             std_peaks.append(int(allele[0]))
             i=+1
-
     a=array(std_peaks)
     stddev=format(std(a),'.6f')
     
@@ -175,25 +173,33 @@ def calc_summary_stats(output_info, cutoff):
             average_depth=0
         #Calculate the wildtype information by comparing mutant depth to average depth
         if average_depth != 0 and info['total_mutant_depth'] < average_depth:
-            wildtype_fraction=ceil(float(average_depth-info['total_mutant_depth'])/average_depth)
-            wildtype_ave_depth=int(average_depth-info['total_mutant_depth'])
+            wildtype_ave_depth=int(info['total_depth']-info['total_mutant_depth'])/info['total_sites']
+            wildtype_fraction=float(wildtype_ave_depth)/average_depth
         else:
             wildtype_fraction, wildtype_ave_depth=0,0
             sites[0]='0:0:0'
         if info['indels']:
-            highest_frac = calc_highest_peak(info['indels'], wildtype_ave_depth, wildtype_fraction)
+            highest_frac = calc_highest_peak(info['indels'], wildtype_fraction)
             sites=calc_wildtype(info['indels'].keys(), wildtype_ave_depth, wildtype_fraction, highest_frac)
             num_peaks, peaks=calc_number_peaks(info['indels'], sites, highest_frac, cutoff)
             stdev=calc_std_peaks(peaks.values())
             #Sort the peak list naturally (-3,-2,-1,0,1,2,3)
             peak_list=(" ").join(str(x) for x in natsort.natsorted(peaks.values()))
-        else:
-            #if there are no indels, its a wiltype call
+        elif average_depth !=0:
+            #if there are no indels, but there are wild type reads
             wildtype_fraction=1
             sites[0]=(":").join(['0', str(float(wildtype_fraction)), str(wildtype_ave_depth)])
             num_peaks=1
             peak_list=sites[0]
             stdev=0
+        else:
+            #if there are no reads at this site
+            wildtype_fraction=0
+            sites[0]=(":").join(['0', str(float(wildtype_fraction)), str(wildtype_ave_depth)])
+            num_peaks=0
+            peak_list=sites[0]
+            stdev=0
+            
         output_info[name]={'Name':info['Name'],
                            'Average_Depth':average_depth,
                            'Standard_Deviation':stdev,
