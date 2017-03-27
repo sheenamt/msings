@@ -98,7 +98,10 @@ def calc_wildtype(indels, wildtype_ave_depth, wildtype_fraction, highest_frac):
     """
     mx=int(max(indels))+1
     mn=int(min(indels))
-    wt_frac = float(wildtype_fraction)/highest_frac
+    try:
+        wt_frac = float(wildtype_fraction)/highest_frac
+    except ZeroDivisionError:
+        wt_frac = wildtype_fraction
     wildtype=":".join([str(0), str(wt_frac), str(wildtype_ave_depth)])
     sites={0:wildtype}
 
@@ -111,12 +114,10 @@ def calc_highest_peak(info, wt_ave_reads, wt_fraction):
     """
     Calculate the highest peak
     """
-    highest_reads=wt_ave_reads
     highest_frac=wt_fraction
     for loci, details in info.items():
         if details['allele_fraction'] >= highest_frac:
             highest_frac = details['allele_fraction']
-            highest_reads = details['mutant_depth']
     return highest_frac
 
 def calc_number_peaks(info, sites, highest_frac, cutoff):
