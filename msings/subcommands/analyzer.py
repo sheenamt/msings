@@ -45,9 +45,6 @@ def calc_msi_dist(variant,msi_site):
     info={}
     #reference/WT info:
     wildtype_reads=variant['base:reads:strands:avg_qual:map_qual:plus_reads:minus_reads'].split(':')[1]
-    msi_site['total_wildtype_depth']+=int(wildtype_reads)
-    if int(wildtype_reads) >0:
-        msi_site['wildtype_tally']+=1
     #Grab all the deletions
     dels = filter(lambda s: "DEL" in str(s), variant['Misc'])
     #And all the insertions
@@ -70,7 +67,7 @@ def calc_msi_dist(variant,msi_site):
             length=int(info[1])
         reads=int(info[3])
         #Want a total mutant depth for this loci 
-        msi_site['mutant_depth']=msi_site['mutant_depth']+reads
+        msi_site['total_mutant_depth']=msi_site['total_mutant_depth']+reads
         #Keep tally of mutants seen 
         msi_site['mutant_tally']+=1
         #If we haven't seen this length of mutation, add it
@@ -172,13 +169,10 @@ def calc_summary_stats(output_info, cutoff):
             average_depth=int(average_depth)
         else:
             average_depth=0
-        #Calculate the wildtype info
-        if average_depth != 0 and info['total_wildtype_depth'] !=0:
-            wildtype_fraction=float(info['total_wildtype_depth'])/info['total_depth']
-            #Use ceil to round up 
-            wildtype_ave_depth=ceil(float(info['total_wildtype_depth'])/info['wildtype_tally'])
-            #Turn to int
-            wildtype_ave_depth=int(wildtype_ave_depth)
+        #Calculate the wildtype information by comparing mutant depth to average depth
+        if average_depth != 0 and info['total_mutant_depth'] < average_depth:
+            wildtype_fraction=ceil(float(average_depth-info['total_mutant_depth'])/average_depth)
+            wildtype_ave_depth=int(average_depth-info['total_mutant_depth'])
         else:
             wildtype_fraction, wildtype_ave_depth=0,0
             sites[0]='0:0:0'
@@ -217,11 +211,9 @@ def parse_msi_bedfile(row, msi_sites, output_info):
         msi_sites[row['chrom']][position] = msi_loci
 
     output_info[msi_loci]={'Name':row['name'],
-                           'total_wildtype_depth':0,
-                           'wildtype_tally':0,
                            'total_depth':0,
                            'total_sites':0,
-                           'mutant_depth':0,
+                           'total_mutant_depth':0,
                            'mutant_tally':0,
                            'indels':{}}
     
@@ -245,7 +237,9 @@ def action(args):
     for row in sample_msi:
         loci_name = msi_sites[row['chrom']][int(row['position'])]
         output_info[loci_name].update(calc_msi_dist(row, output_info[loci_name]))
+
     output.update(calc_summary_stats(output_info, cutoff))
+    print output
     fieldnames=['Position','Name','Average_Depth','Number_of_Peaks','Standard_Deviation','IndelLength:AlleleFraction:SupportingCalls']
 
     writer = csv.DictWriter(args.outfile, fieldnames = fieldnames,  extrasaction = 'ignore', delimiter = '\t')

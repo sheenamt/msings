@@ -32,36 +32,26 @@ control ='5437_E05_OPXv4_NA12878_MA0013'
 MSI_LOCI={'1': {1: '1:1-5', 2: '1:1-5', 3: '1:1-5', 4: '1:1-5', 5: '1:1-5', 7: '1:7-11', 8: '1:7-11', 9: '1:7-11', 10: '1:7-11', 11: '1:7-11'}, 
           '7': {1: '7:1-5', 2: '7:1-5', 3: '7:1-5', 4: '7:1-5', 5: '7:1-5', 7: '7:7-11', 8: '7:7-11', 9: '7:7-11', 10: '7:7-11', 11: '7:7-11'}}
 
-OUTPUT_RAW={'1:1-5': {'total_depth': 0, 'total_wildtype_depth': 0, 'wildtype_tally':0,'Name': 'NAME1', 'mutant_depth': 0, 'mutant_tally': 0, 'total_sites': 0, 'indels': {}}, 
-            '7:1-5': {'total_depth': 0, 'total_wildtype_depth': 0, 'wildtype_tally':0,'Name': 'NAME3', 'mutant_depth': 0, 'mutant_tally': 0, 'total_sites': 0, 'indels': {}}, 
-            '1:7-11': {'total_depth': 0, 'total_wildtype_depth': 0, 'wildtype_tally':0, 'Name': 'NAME2', 'mutant_depth': 0, 'mutant_tally': 0, 'total_sites': 0, 'indels': {}},
-            '7:7-11': {'total_depth': 0, 'total_wildtype_depth': 0, 'wildtype_tally':0, 'Name': 'NAME4', 'mutant_depth': 0, 'mutant_tally': 0, 'total_sites': 0, 'indels': {}}}
+OUTPUT_RAW={'1:1-5': {'total_depth': 0, 'Name': 'NAME1', 'total_mutant_depth': 0, 'mutant_tally': 0, 'total_sites': 0, 'indels': {}}, 
+            '7:1-5': {'total_depth': 0, 'Name': 'NAME3', 'total_mutant_depth': 0, 'mutant_tally': 0, 'total_sites': 0, 'indels': {}}, 
+            '1:7-11': {'total_depth': 0, 'Name': 'NAME2', 'total_mutant_depth': 0, 'mutant_tally': 0, 'total_sites': 0, 'indels': {}},
+            '7:7-11': {'total_depth': 0,  'Name': 'NAME4', 'total_mutant_depth': 0, 'mutant_tally': 0, 'total_sites': 0, 'indels': {}}}
 
-
-MSI_SITE_DATA={'1:1-5': {'site_depth': 100, 'total_depth': 500, 'total_wildtype_depth': 500, 'indels': {},
-                         'mutant_depth': 0,'mutant_tally': 0, 'total_sites': 5, 'Name': 'NAME1', 'wildtype_tally':5}, 
-               '7:1-5': {'site_depth': 50, 'total_depth': 250, 'total_wildtype_depth': 130, 'wildtype_tally':4,
-                         'indels': {1: {'site_depth': 150, 'mutant_tally': 3, 'allele_fraction': 0.7333333333333333, 'mutant_depth': 110}, 
-                                    -1: {'site_depth': 50, 'mutant_tally': 1, 'allele_fraction': 0.2, 'mutant_depth': 10}}, 
-                         'mutant_depth': 120, 'mutant_tally': 4, 'total_sites': 5, 'Name': 'NAME3'}, 
-               '1:7-11': {'site_depth': 100, 'total_depth': 500, 'total_wildtype_depth': 470,'wildtype_tally': 5,
-                          'indels': {1: {'site_depth': 300, 'mutant_tally': 3, 'allele_fraction': 0.04666666666666667, 'mutant_depth': 14}, 
-                                     -3: {'site_depth': 300, 'mutant_tally': 3, 'allele_fraction': 0.05333333333333334, 'mutant_depth': 16}}, 
-                          'mutant_depth': 30, 'mutant_tally': 6, 'total_sites': 5, 'Name': 'NAME2'},
-               '7:7-11': {'site_depth': 0, 'total_depth': 0, 'total_wildtype_depth': 00, 'wildtype_tally':0,
-                          'indels': {},
-                          'mutant_depth': 0, 'mutant_tally': 0, 'total_sites': 5, 'Name': 'NAME4'}}
+MSI_SITE_DATA={'1:1-5': {'site_depth': 100, 'total_depth': 500, 'Name': 'NAME1', 'mutant_tally': 0, 'total_mutant_depth': 0, 'total_sites': 5, 'indels': {}}, 
+               '1:7-11': {'site_depth': 100, 'total_depth': 500, 'Name': 'NAME2', 'mutant_tally': 6, 'total_mutant_depth': 30, 'total_sites': 5, 
+                          'indels': {1: {'site_depth': 300, 'mutant_tally': 3, 'allele_fraction': 0.04666666666666667, 'mutant_depth': 14}, -3: {'site_depth': 300, 'mutant_tally': 3, 'allele_fraction': 0.05333333333333334, 'mutant_depth': 16}}},
+               '7:1-5': {'site_depth': 50, 'total_depth': 250, 'Name': 'NAME3', 'mutant_tally': 4, 'total_mutant_depth': 120, 'total_sites': 5, 
+                         'indels': {1: {'site_depth': 150, 'mutant_tally': 3, 'allele_fraction': 0.7333333333333333, 'mutant_depth': 110}, -1: {'site_depth': 50, 'mutant_tally': 1, 'allele_fraction': 0.2, 'mutant_depth': 10}}},
+               '7:7-11': {'site_depth': 0, 'total_depth': 0, 'Name': 'NAME4', 'mutant_tally': 0, 'total_mutant_depth': 0, 'total_sites': 5, 'indels': {}}}
 #'1:1-5' == wt
 #'1:7-11' == wt biggest peak
 #'7:1-5' == mut biggest peak, wt_tally != total_sites
 #'7:7-11' == no coverage
 
-OUTPUT = {'1:1-5': {'IndelLength:AlleleFraction:SupportingCalls': '0:1.0:100', 'Standard_Deviation': 0, 'Average_Depth': 100, 'Number_of_Peaks': 1, 'Name': 'NAME1'},
-          '1:7-11': {'IndelLength:AlleleFraction:SupportingCalls': '-3:0.0567375886525:16 -2:0:0 -1:0:0 0:1.0:94 1:0.0496453900709:14', 'Standard_Deviation': '1.094994', 'Average_Depth': 100, 'Number_of_Peaks': 2, 'Name': 'NAME2'},
-          '7:1-5': {'IndelLength:AlleleFraction:SupportingCalls': '-1:0.272727272727:10 0:0.709090909091:33 1:1.0:110', 'Standard_Deviation': '0.597602', 'Average_Depth': 50, 'Number_of_Peaks': 3, 'Name': 'NAME3'}, 
-          '7:7-11': {'IndelLength:AlleleFraction:SupportingCalls': '0:1.0:0', 'Standard_Deviation': 0, 'Average_Depth': 0, 'Number_of_Peaks': 1, 'Name': 'NAME4'}}
-
-
+OUTPUT = {'1:1-5': {'Standard_Deviation': 0, 'Average_Depth': 100, 'Number_of_Peaks': 1, 'Name': 'NAME1', 'IndelLength:AlleleFraction:SupportingCalls': '0:1.0:100'}, 
+          '1:7-11': {'Standard_Deviation': '1.210124', 'Average_Depth': 100, 'Number_of_Peaks': 2, 'Name': 'NAME2', 'IndelLength:AlleleFraction:SupportingCalls': '-3:0.0533333333333:16 -2:0:0 -1:0:0 0:1.0:70 1:0.0466666666667:14'}, 
+          '7:1-5': {'Standard_Deviation': '0.552771', 'Average_Depth': 50, 'Number_of_Peaks': 3, 'Name': 'NAME3', 'IndelLength:AlleleFraction:SupportingCalls': '-1:0.272727272727:10 0:0.0:0 1:1.0:110'}, 
+          '7:7-11': {'Standard_Deviation': 0, 'Average_Depth': 0, 'Number_of_Peaks': 1, 'Name': 'NAME4', 'IndelLength:AlleleFraction:SupportingCalls': '0:1.0:0'}}
 
 class TestFormatter(TestBase):
     """
@@ -122,25 +112,32 @@ class TestAnalyzer(TestBase):
         """
         msi_sites1=copy.deepcopy(MSI_SITE_DATA['7:1-5'])
         msi_sites2=copy.deepcopy(MSI_SITE_DATA['1:7-11'])
-        wt_1 = float(msi_sites1['total_wildtype_depth'])/msi_sites1['total_depth']
-        wt_2 = float(msi_sites2['total_wildtype_depth'])/msi_sites2['total_depth']
-        wt_ave_depth1=int(msi_sites1['total_wildtype_depth'])/msi_sites1['wildtype_tally']
-        wt_ave_depth2=int(msi_sites2['total_wildtype_depth'])/msi_sites2['wildtype_tally']
-        highest_frac1 = analyzer.calc_highest_peak(msi_sites1['indels'], wt_ave_depth1, wt_1)
-        highest_frac2 = analyzer.calc_highest_peak(msi_sites2['indels'], wt_ave_depth2, wt_2)
+        average_depth1=ceil(float(msi_sites1['total_depth'])/msi_sites1['total_sites'])
+        wt_frac1=ceil(float(average_depth1-msi_sites1['total_mutant_depth'])/average_depth1)
+        wt_ave1=int(average_depth1-msi_sites1['total_mutant_depth'])
+        highest_frac1 = analyzer.calc_highest_peak(msi_sites1['indels'], wt_ave1, wt_frac1)
+
+        average_depth2=ceil(float(msi_sites2['total_depth'])/msi_sites2['total_sites'])
+        wt_frac2=ceil(float(average_depth2-msi_sites2['total_mutant_depth'])/average_depth2)
+        wt_ave2=int(average_depth2-msi_sites2['total_mutant_depth'])
+        highest_frac2 = analyzer.calc_highest_peak(msi_sites2['indels'], wt_ave2, wt_frac2)
+
         self.assertEqual(0.7333333333333333, highest_frac1)
-        self.assertEqual(0.94, highest_frac2)        
+        self.assertEqual(1.0, highest_frac2)        
 
     def testCalcNumberPeaks(self):
         """Test that the number of peaks and the peak annotation
         is being calculated/parsed correctly. 
         """
         msi_sites1=copy.deepcopy(MSI_SITE_DATA['7:1-5'])
-        wt_1 = float(msi_sites1['total_wildtype_depth'])/msi_sites1['total_depth']
-        wt_ave_depth1=int(msi_sites1['total_wildtype_depth'])/msi_sites1['wildtype_tally']
+
+        average_depth1=ceil(float(msi_sites1['total_depth'])/msi_sites1['total_sites'])
+        wt_frac1=ceil(float(average_depth1-msi_sites1['total_mutant_depth'])/average_depth1)
+        wt_ave1=int(average_depth1-msi_sites1['total_mutant_depth'])
+
         cutoff=[0.05]
         peaks = []
-        highest_reads1 = analyzer.calc_highest_peak(msi_sites1['indels'], wt_ave_depth1, wt_1)
+        highest_reads1 = analyzer.calc_highest_peak(msi_sites1['indels'], wt_ave1, wt_frac1)
         sites={0: '0:1.0:27'}
         num_peaks, sites=analyzer.calc_number_peaks(msi_sites1['indels'], sites, highest_reads1, cutoff)
         output_peaks=1
@@ -152,11 +149,12 @@ class TestAnalyzer(TestBase):
         """Test the Wildtype calculations"""
         msi_sites=copy.deepcopy(MSI_SITE_DATA['1:7-11'])
         sites = {}
-        wt_frac = float(msi_sites['total_wildtype_depth'])/msi_sites['total_depth']
-        wt_ave=ceil(float(msi_sites['total_wildtype_depth'])/msi_sites['wildtype_tally'])
+        average_depth=ceil(float(msi_sites['total_depth'])/msi_sites['total_sites'])
+        wt_frac =ceil(float(average_depth-msi_sites['total_mutant_depth'])/average_depth)
+        wt_ave=int(average_depth-msi_sites['total_mutant_depth'])
         wt_ave=int(wt_ave)
         sites=analyzer.calc_wildtype(msi_sites['indels'].keys(), wt_ave, wt_frac, wt_frac)
-        wt_output={0: '0:1.0:94', -1: '-1:0:0', -3: '-3:0:0', -2: '-2:0:0', 1: '1:0:0'}
+        wt_output={0: '0:1.0:70', -1: '-1:0:0', -3: '-3:0:0', -2: '-2:0:0', 1: '1:0:0'}
 
         self.assertDictEqual(sites, wt_output)
 
