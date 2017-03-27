@@ -237,9 +237,7 @@ def action(args):
     for row in sample_msi:
         loci_name = msi_sites[row['chrom']][int(row['position'])]
         output_info[loci_name].update(calc_msi_dist(row, output_info[loci_name]))
-
     output.update(calc_summary_stats(output_info, cutoff))
-    print output
     fieldnames=['Position','Name','Average_Depth','Number_of_Peaks','Standard_Deviation','IndelLength:AlleleFraction:SupportingCalls']
 
     writer = csv.DictWriter(args.outfile, fieldnames = fieldnames,  extrasaction = 'ignore', delimiter = '\t')
