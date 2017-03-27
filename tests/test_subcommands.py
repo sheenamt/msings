@@ -49,9 +49,9 @@ MSI_SITE_DATA={'1:1-5': {'site_depth': 100, 'total_depth': 500, 'Name': 'NAME1',
 #'7:7-11' == no coverage
 
 OUTPUT = {'1:1-5': {'Standard_Deviation': 0, 'Average_Depth': 100, 'Number_of_Peaks': 1, 'Name': 'NAME1', 'IndelLength:AlleleFraction:SupportingCalls': '0:1.0:100'}, 
-          '1:7-11': {'Standard_Deviation': '1.210124', 'Average_Depth': 100, 'Number_of_Peaks': 2, 'Name': 'NAME2', 'IndelLength:AlleleFraction:SupportingCalls': '-3:0.0533333333333:16 -2:0:0 -1:0:0 0:1.0:70 1:0.0466666666667:14'}, 
-          '7:1-5': {'Standard_Deviation': '0.552771', 'Average_Depth': 50, 'Number_of_Peaks': 3, 'Name': 'NAME3', 'IndelLength:AlleleFraction:SupportingCalls': '-1:0.272727272727:10 0:0.0:0 1:1.0:110'}, 
-          '7:7-11': {'Standard_Deviation': 0, 'Average_Depth': 0, 'Number_of_Peaks': 1, 'Name': 'NAME4', 'IndelLength:AlleleFraction:SupportingCalls': '0:1.0:0'}}
+          '1:7-11': {'Standard_Deviation': '1.094994', 'Average_Depth': 100, 'Number_of_Peaks': 2, 'Name': 'NAME2', 'IndelLength:AlleleFraction:SupportingCalls': '-3:0.0567375886525:16 -2:0:0 -1:0:0 0:1.0:94 1:0.0496453900709:14'},
+          '7:1-5': {'Standard_Deviation': '0.552771', 'Average_Depth': 50, 'Number_of_Peaks': 2, 'Name': 'NAME3', 'IndelLength:AlleleFraction:SupportingCalls': '-1:0.272727272727:10 0:0.0:0 1:1.0:110'}, 
+          '7:7-11': {'Standard_Deviation': 0, 'Average_Depth': 0, 'Number_of_Peaks': 0, 'Name': 'NAME4', 'IndelLength:AlleleFraction:SupportingCalls': '0:0.0:0'}}
 
 class TestFormatter(TestBase):
     """
@@ -111,19 +111,19 @@ class TestAnalyzer(TestBase):
         """Test that the highest peak is returned
         """
         msi_sites1=copy.deepcopy(MSI_SITE_DATA['7:1-5'])
-        msi_sites2=copy.deepcopy(MSI_SITE_DATA['1:7-11'])
         average_depth1=ceil(float(msi_sites1['total_depth'])/msi_sites1['total_sites'])
-        wt_frac1=ceil(float(average_depth1-msi_sites1['total_mutant_depth'])/average_depth1)
-        wt_ave1=int(average_depth1-msi_sites1['total_mutant_depth'])
-        highest_frac1 = analyzer.calc_highest_peak(msi_sites1['indels'], wt_ave1, wt_frac1)
+        wt_ave1=int(msi_sites1['total_depth']-msi_sites1['total_mutant_depth'])/msi_sites1['total_sites']
+        wt_frac1=float(wt_ave1)/average_depth1
+        highest_frac1 = analyzer.calc_highest_peak(msi_sites1['indels'], wt_frac1)
 
+        msi_sites2=copy.deepcopy(MSI_SITE_DATA['1:7-11'])
         average_depth2=ceil(float(msi_sites2['total_depth'])/msi_sites2['total_sites'])
-        wt_frac2=ceil(float(average_depth2-msi_sites2['total_mutant_depth'])/average_depth2)
-        wt_ave2=int(average_depth2-msi_sites2['total_mutant_depth'])
-        highest_frac2 = analyzer.calc_highest_peak(msi_sites2['indels'], wt_ave2, wt_frac2)
+        wt_ave2=int(msi_sites2['total_depth']-msi_sites2['total_mutant_depth'])/msi_sites2['total_sites']
+        wt_frac2=float(wt_ave2)/average_depth2
+        highest_frac2 = analyzer.calc_highest_peak(msi_sites2['indels'], wt_frac2)
 
         self.assertEqual(0.7333333333333333, highest_frac1)
-        self.assertEqual(1.0, highest_frac2)        
+        self.assertEqual(0.94, highest_frac2)        
 
     def testCalcNumberPeaks(self):
         """Test that the number of peaks and the peak annotation
@@ -132,16 +132,16 @@ class TestAnalyzer(TestBase):
         msi_sites1=copy.deepcopy(MSI_SITE_DATA['7:1-5'])
 
         average_depth1=ceil(float(msi_sites1['total_depth'])/msi_sites1['total_sites'])
-        wt_frac1=ceil(float(average_depth1-msi_sites1['total_mutant_depth'])/average_depth1)
-        wt_ave1=int(average_depth1-msi_sites1['total_mutant_depth'])
-
-        cutoff=[0.05]
+        wt_ave1=int(msi_sites1['total_depth']-msi_sites1['total_mutant_depth'])/msi_sites1['total_sites']
+        wt_frac1=float(wt_ave1)/average_depth1
+        highest_frac1 = analyzer.calc_highest_peak(msi_sites1['indels'], wt_frac1)
+        cutoff=0.05
         peaks = []
-        highest_reads1 = analyzer.calc_highest_peak(msi_sites1['indels'], wt_ave1, wt_frac1)
-        sites={0: '0:1.0:27'}
-        num_peaks, sites=analyzer.calc_number_peaks(msi_sites1['indels'], sites, highest_reads1, cutoff)
-        output_peaks=1
-        output_site_info={0: '0:1.0:27', 1: '1:1.0:110', -1: '-1:0.272727272727:10'}
+        highest_frac1 = analyzer.calc_highest_peak(msi_sites1['indels'], wt_frac1)
+        wt_sites=analyzer.calc_wildtype(msi_sites1['indels'].keys(), wt_ave1, wt_frac1, highest_frac1)
+        num_peaks, sites=analyzer.calc_number_peaks(msi_sites1['indels'], wt_sites, highest_frac1, cutoff)
+        output_peaks=3
+        output_site_info={0: '0:0.709090909091:26', 1: '1:1.0:110', -1: '-1:0.272727272727:10'}
         self.assertEqual(num_peaks, output_peaks)
         self.assertEqual(sites, output_site_info)
 
