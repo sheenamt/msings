@@ -127,7 +127,10 @@ def calc_number_peaks(info, sites, highest_frac, cutoff):
     peaks =0
     for loci, details in info.items():
         #take highest allele fraction and divide each alele fraction by that number
-        allele_fraction = float(details['allele_fraction'])/highest_frac
+        try:
+            allele_fraction = float(details['allele_fraction'])/highest_frac
+        except ZeroDivisionError:
+            allele_fraction = float(details['allele_fraction'])
         peak=":".join([str(loci), str(allele_fraction), str(details['mutant_depth'])])
         #Overwrite this site if the allele fraction is more than the cutoff
         sites[loci]=peak
