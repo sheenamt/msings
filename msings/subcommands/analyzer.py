@@ -52,8 +52,8 @@ def calc_msi_dist(variant,msi_site):
     sites=dels + ins
 
     #Want total depth to reflect all sites, not just DEL/INS
-    msi_site['total_depth']+=int(variant['q10_depth'])
-    msi_site['site_depth']=int(variant['q10_depth'])
+    msi_site['total_depth']+=int(variant['depth'])
+    msi_site['site_depth']=int(variant['depth'])
     #Keep tally of sites seen
     msi_site['total_sites']+=1
 
@@ -72,23 +72,15 @@ def calc_msi_dist(variant,msi_site):
         msi_site['mutant_tally']+=1
         #If we haven't seen this length of mutation, add it
         if not length in msi_site['indels'].keys():
-            try:
-                allele_fraction=reads/float(msi_site['site_depth'])
-            except ZeroDivisionError:
-                allele_fraction=0.0
-            msi_site['indels'][length]={'allele_fraction':allele_fraction}
-            msi_site['indels'][length]['site_depth']=int(variant['q10_depth'])
+            msi_site['indels'][length]={'allele_fraction':0}
+            msi_site['indels'][length]['site_depth']=int(variant['depth'])
             msi_site['indels'][length]['mutant_depth']=reads
             msi_site['indels'][length]['mutant_tally']=1
             #Otherwise, update the counts for this mutation length
         else:   
             msi_site['indels'][length]['mutant_tally']+=1
-            msi_site['indels'][length]['site_depth']+=int(variant['q10_depth'])
+            msi_site['indels'][length]['site_depth']+=int(variant['depth'])
             msi_site['indels'][length]['mutant_depth']=msi_site['indels'][length]['mutant_depth']+reads
-            try:
-                msi_site['indels'][length]['allele_fraction']=float(msi_site['indels'][length]['mutant_depth'])/msi_site['indels'][length]['site_depth']
-            except ZeroDivisionError:
-                msi_site['indels'][length]['allele_fraction']=msi_site['indels'][length]['allele_fraction']
 
     return msi_site
 
@@ -110,12 +102,13 @@ def calc_wildtype(indels, wildtype_ave_depth, wildtype_fraction, highest_frac):
             sites[key]=str(key)+':0:0'
     return sites
 
-def calc_highest_peak(info, wt_fraction):
+def calc_highest_peak(info, wt_fraction, average_depth):
     """
     Calculate the highest peak
     """
     highest_frac=wt_fraction
     for loci, details in info.items():
+        details['allele_fraction'] = float(details['mutant_depth'])/average_depth
         if details['allele_fraction'] >= highest_frac:
             highest_frac = details['allele_fraction']
     return highest_frac
@@ -155,7 +148,7 @@ def calc_std_peaks(peaks):
     stddev=format(std(a),'.6f')
     
     return stddev
-
+    
 def calc_summary_stats(output_info, cutoff):
     """Calculate average read depth, number of peaks, standard
     deviation and report each peak for each msi range in the bed file
@@ -171,15 +164,14 @@ def calc_summary_stats(output_info, cutoff):
             average_depth=int(average_depth)
         else:
             average_depth=0
-        #Calculate the wildtype information by comparing mutant depth to average depth
-        if average_depth != 0 and info['total_mutant_depth'] < average_depth:
-            wildtype_ave_depth=int(info['total_depth']-info['total_mutant_depth'])/info['total_sites']
-            wildtype_fraction=float(wildtype_ave_depth)/average_depth
+        if average_depth != 0 and info['total_mutant_depth'] <= average_depth:
+             wildtype_ave_depth=int(average_depth-info['total_mutant_depth'])
+             wildtype_fraction=float(wildtype_ave_depth)/average_depth
         else:
             wildtype_fraction, wildtype_ave_depth=0,0
             sites[0]='0:0:0'
         if info['indels']:
-            highest_frac = calc_highest_peak(info['indels'], wildtype_fraction)
+            highest_frac = calc_highest_peak(info['indels'], wildtype_fraction, average_depth)
             sites=calc_wildtype(info['indels'].keys(), wildtype_ave_depth, wildtype_fraction, highest_frac)
             num_peaks, peaks=calc_number_peaks(info['indels'], sites, highest_frac, cutoff)
             stdev=calc_std_peaks(peaks.values())
