@@ -64,7 +64,7 @@ Required Input files:
 
 4. msi_baseline : MSI baseline file (see example under "doc/mSINGS_TCGA.baseline")  - describes the average and standard deviation of the number of expected signal peaks at each locus, as calculated from an MSI negative population (blood samples or MSI negative tumors).  User generates this file with msi create_baseline script (see below).  **IMPORTANT NOTE**:  Baseline statistics vary markedly from assay-to-assay and lab-to-lab.  It is **CRITICAL** that you prepare a baseline file that is specific for your analytic process, and for which data have been generated using the same protocols. 
 
-5. msi_intervals : MSI interval file (see example under "doc/mSINGS_TCGA.intervals")  - file for internal program use.  User makes this using msi formatter script.
+5. msi_intervals : MSI interval file (see example under "doc/mSINGS_TCGA.intervals")  - file for internal program use.  User makes this using create_intervals script.
 
 Please note that both your reference genome and bed files MUST follow the same naming convention of chromosomes (ie "chr1" or just "1", without the "chr" prefix).  Chromosomes are numbered numerically, or as "X" or "Y" - other chromsome names are not supported.
 
