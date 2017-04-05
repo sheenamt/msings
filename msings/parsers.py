@@ -23,10 +23,6 @@ sample counts, and scores calculated based on counts
 def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier, threshold):
     """Compare the sample-msi output to the baseline file, report
     Total sites, MSI+ sites and msings score"""
-    #Grab the MSI files
-    files = ifilter(filters.msi_file_finder,files) 
-    files=sorted(files)
-
     #Grab the MSI Control info
     control_info=csv.DictReader(control_file, delimiter='\t')
     control_info=natsort.natsorted(control_info, key=itemgetter('Position'))
