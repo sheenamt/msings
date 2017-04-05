@@ -20,6 +20,7 @@ from numpy import std, array, average, sum
 
 from msings.parsers import parse_msi
 from msings.utils import walker
+from msings import filters
 
 def build_parser(parser):
     parser.add_argument('control_file', 
@@ -35,6 +36,8 @@ def build_parser(parser):
     parser.add_argument('-t','--msi_threshold',
                         nargs='+',
                         help='MSI score threshold or range of two thresholds, default of 0.2')
+    parser.add_argument('-p', '--pipeline_manifest', type=argparse.FileType('rU'),
+                        help='Path to pipeline manifest, used for ordering output in UW pipeline specifically')    
     parser.add_argument('-o', '--outfile', 
                         type=argparse.FileType('w'),
                         default=sys.stdout,
@@ -46,15 +49,25 @@ def action(args):
     prefixes = []
     variant_keys =[]
     files = walker(args.path)  
+    files = filter(filters.msi_file_finder,files) 
+    files_sorted=[]
+    if args.pipeline_manifest:
+        sort_order = [x['barcode_id'] for x in csv.DictReader(args.pipeline_manifest)]
+        for sample in sort_order:
+            #Grab the file for each sample, in specified sort order
+            pfx_file = [s for s in files if sample in s.fname]
+            if pfx_file:
+                files_sorted.append(pfx_file[0])
+    else:
+        files_sorted=files
     analysis_type='parse_msi'
-
     multiplier=args.multiplier
     if args.msi_threshold:
         threshold=args.msi_threshold        
     else:
         threshold=[0.2,0.2]
     control_file = args.control_file
-    chosen_parser='{}(files, control_file, specimens, prefixes, variant_keys, multiplier,threshold)'.format(analysis_type)
+    chosen_parser='{}(files_sorted, control_file, specimens, prefixes, variant_keys, multiplier,threshold)'.format(analysis_type)
     specimens, prefixes, fieldnames, variant_keys=eval(chosen_parser)
 
     writer = csv.DictWriter(args.outfile, fieldnames = fieldnames,  extrasaction = 'ignore', delimiter = '\t')
