@@ -15,7 +15,7 @@ from operator import itemgetter
 from itertools import ifilter
 from collections import namedtuple, defaultdict
 from msings.utils import walker
-from msings import parsers
+from msings import parsers, filters
 
 
 from __init__ import TestBase
@@ -40,6 +40,7 @@ class TestParsers(TestBase):
         variant_keys = []
         control_info=open(path.join(testMSIfile, 'testMSIcontrol'),'rU')
         files = walker(testMSIfile)        
+        files = filter(filters.msi_file_finder,files)
         analysis_type='parsers.parse_msi'
         multiplier=2.0
         threshold=[0.2, 0.9]
