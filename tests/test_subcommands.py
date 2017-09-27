@@ -150,7 +150,7 @@ class TestAnalyzer(TestBase):
         self.assertEqual(num_peaks, output_peaks)
         self.assertEqual(sites, output_site_info)
 
-    def testCalcWildType(self):
+    def testCalcWildType1(self):
         """Test the Wildtype calculations"""
         msi_sites=copy.deepcopy(MSI_SITE_DATA['1:7-11'])
         sites = {}
@@ -168,4 +168,21 @@ class TestAnalyzer(TestBase):
         peaks=['0:0.863414634146:354', '1:0.0402598525993:17', '-1:0.0855382887727:34', '-2:0.0132135895294:5']
         stdev=analyzer.calc_std_peaks(peaks)
         self.assertEqual(stdev, '0.410894')
-
+    
+    def testDefineSites(self):
+        """ Test that the sites array is created correctly"""
+        set1=analyzer.define_sites([3], {})
+        set2=analyzer.define_sites([-3], {})
+        set3=analyzer.define_sites([-3,2], {})
+        set4=analyzer.define_sites([2,4], {})
+        
+        
+        site_output1={0: '0:0:0', 1: '1:0:0', 2: '2:0:0', 3: '3:0:0'}
+        site_output2={-3: '-3:0:0', -2: '-2:0:0', -1: '-1:0:0', 0: '0:0:0'}
+        site_output3={-3: '-3:0:0', -2: '-2:0:0', -1: '-1:0:0', 0: '0:0:0', 1: '1:0:0',2: '2:0:0'}
+        site_output4={0: '0:0:0', 1: '1:0:0', 2: '2:0:0', 3: '3:0:0', 4: '4:0:0'}
+        
+        self.assertDictEqual(set1, site_output1)
+        self.assertDictEqual(set2, site_output2)
+        self.assertDictEqual(set3, site_output3)
+        self.assertDictEqual(set4, site_output4)
