@@ -84,22 +84,49 @@ def calc_msi_dist(variant,msi_site):
 
     return msi_site
 
+def define_sites(indels, sites):
+    """
+    Create a site entry for all variant lengths between abs(max) and 0
+    """
+    #If only one indel
+    if len(indels)==1:
+        #If del
+        if indels[0]>0:
+            mx = int(indels[0])
+            mn=0
+        #If ins
+        else:
+            mx = 0
+            mn = int(indels[0])
+    else:
+        mn=int(min(indels))
+        mx=int(max(indels))
+        #If both dels
+        if mn < 0 and mx < 0:
+            mx = 0
+        #if both ins
+        elif mn > 0 and mx > 0:
+            mn = 0
+    sites[0]='0:0:0' 
+    for key in range(mn,mx+1):
+        if key not in sites.keys():
+            sites[key]=str(key)+':0:0'
+    return sites
+    
 def calc_wildtype(indels, wildtype_ave_depth, wildtype_fraction, highest_frac): 
     """
     Set up wildtype info and empty values for each indel length
     """
-    mx=int(max(indels))+1
-    mn=int(min(indels))
+    sites = {}
+    sites = define_sites(indels, sites)
+
     try:
         wt_frac = float(wildtype_fraction)/highest_frac
     except ZeroDivisionError:
         wt_frac = float(wildtype_fraction)
     wildtype=":".join([str(0), str(wt_frac), str(wildtype_ave_depth)])
-    sites={0:wildtype}
+    sites[0]=wildtype
 
-    for key in range(mn,mx):
-        if key not in sites.keys():
-            sites[key]=str(key)+':0:0'
     return sites
 
 def calc_highest_peak(info, wt_fraction, average_depth):
