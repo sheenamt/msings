@@ -9,4 +9,4 @@ def msi_file_finder(pth):
     """
     Return True if pth represents a msi file file.
     """
-    return bool(re.search(r'.msi.txt', pth.fname))
+    return bool(pth.fname.endswith('.msi.txt'))
