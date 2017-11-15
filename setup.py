@@ -9,7 +9,7 @@ from setuptools import setup
 from os.path import join
 
 subprocess.call('git log --pretty=format:%h -n 1 > msings/data/sha', shell = True)
-subprocess.call('git shortlog --format="XXYYXX%h" | grep -c XXYYXX > msings/data/ver', shell = True)
+subprocess.call('git describe > msings/data/ver', shell = True)
 
 from msings import __version__
 from msings.scripts import script
