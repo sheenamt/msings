@@ -57,7 +57,7 @@ for BAM in `sed '/^$/d' $BAM_LIST`; do
 done
 
 echo "Creating summary analysis file for all samples" >> $SAVEPATH/msi_run_log.txt;
-msi count_msi_samples $MSI_BASELINE $SAVEPATH -o $SAVEPATH/Combined_MSI.txt
+msi count_msi_samples $MSI_BASELINE $SAVEPATH -m $multiplier -t $msi_min_threshold $msi_max_threshold -o $SAVEPATH/Combined_MSI.txt
 
 
 
