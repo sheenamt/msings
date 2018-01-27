@@ -18,7 +18,9 @@ from itertools import groupby, ifilter
 from operator import itemgetter
 from numpy import std, array, average, sum
 
-from msings.parsers import parse_msi
+import pandas as pd
+
+from msings.parsers import parse_msi, parse_total_mutation_burden
 from msings.utils import walker
 
 def build_parser(parser):
@@ -35,6 +37,9 @@ def build_parser(parser):
     parser.add_argument('-t','--msi_threshold',
                         nargs='+',
                         help='MSI score threshold or range of two thresholds, default of 0.2')
+    parser.add_argument('-b', '--tumor_burden', 
+                        action='store_true',
+                        help='Calcuatel tumor burden. FOR INTERNAL UW USE ONLY, WILL FAIL OTHERWISE')
     parser.add_argument('-o', '--outfile', 
                         type=argparse.FileType('w'),
                         default=sys.stdout,
@@ -45,7 +50,7 @@ def action(args):
     specimens = defaultdict(dict)
     prefixes = []
     variant_keys =[]
-    files = walker(args.path)  
+    files = list(walker(args.path))
     analysis_type='parse_msi'
 
     multiplier=args.multiplier
@@ -55,13 +60,12 @@ def action(args):
         threshold=[0.2,0.2]
     control_file = args.control_file
     chosen_parser='{}(files, control_file, specimens, prefixes, variant_keys, multiplier,threshold)'.format(analysis_type)
-    specimens, prefixes, fieldnames, variant_keys=eval(chosen_parser)
+    specimens, prefixes, fieldnames, variant_keys =eval(chosen_parser)
+    if args.tumor_burden:
+        specimens=parse_total_mutation_burden(specimens, prefixes, files)
 
-    writer = csv.DictWriter(args.outfile, fieldnames = fieldnames,  extrasaction = 'ignore', delimiter = '\t')
-    writer.writeheader()
-    for position in natsort.natsorted(specimens.keys(), reverse=True):
-        d = {k:v for k,v in zip(variant_keys,position)}  
-        d.update({pfx:specimens[position].get(pfx) for pfx in prefixes})  
-        writer.writerow(d)
+    header = fieldnames
+    
+    specimens.to_csv(args.outfile, na_rep='0',index=False,columns=header,sep='\t')
 
 
