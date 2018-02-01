@@ -60,12 +60,28 @@ def action(args):
         threshold=[0.2,0.2]
     control_file = args.control_file
     chosen_parser='{}(files, control_file, specimens, prefixes, variant_keys, multiplier,threshold)'.format(analysis_type)
-    specimens, prefixes, fieldnames, variant_keys =eval(chosen_parser)
+    specimens, prefixes, variant_keys =eval(chosen_parser)
+
+    #Column headers for output 
+    fieldnames = [variant_keys] + list(prefixes) 
+
+    #list of fields to print first in output
+    msi_fields =['unstable_loci', 'passing_loci','msings_score','msi_status'] 
+
+    #only run tumor_burden at UW
     if args.tumor_burden:
         specimens=parse_total_mutation_burden(specimens, prefixes, files)
+        msi_fields.append('tumor_mutation_burden')
 
-    header = fieldnames
+    writer = csv.writer(args.outfile, delimiter = '\t')
+    writer.writerow(fieldnames)
     
-    specimens.to_csv(args.outfile, na_rep='0',index=False,columns=header,sep='\t')
+    #next print the msi status info, then remove from dataframe
+    for info in msi_fields:
+       parsed_info = specimens['Position']==info
+       to_print=specimens[parsed_info].to_csv(args.outfile, sep='\t',header=False, index=False, columns=fieldnames, na_rep = ' ')
+       #Drop that row from specimens
+       specimens = specimens.ix[~(specimens['Position']==info)]
 
+    specimens.to_csv(args.outfile, na_rep=' ', index=False, columns=fieldnames, header=False, sep='\t')
 

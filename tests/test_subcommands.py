@@ -224,3 +224,4 @@ class TestAnalyzer(TestBase):
         cmd=["msi", "count_msi_samples", baseline, msi_testfiles, "-o", created_msi_output]
         subprocess.call(cmd)
         self.assertTrue(filecmp.cmp(expected_msi_output, created_msi_output))
+
