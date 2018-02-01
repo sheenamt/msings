@@ -10,6 +10,8 @@ import csv
 import sys
 import json
 import copy
+import subprocess
+import filecmp
 
 from numpy import std, average,ceil
 from operator import itemgetter
@@ -186,3 +188,13 @@ class TestAnalyzer(TestBase):
         self.assertDictEqual(set2, site_output2)
         self.assertDictEqual(set3, site_output3)
         self.assertDictEqual(set4, site_output4)
+
+    def testCountMSI(self):
+        """Test the output creation"""
+        expected_msi_output = os.path.join(msi_testfiles, 'expected_test_msi_output')
+        created_msi_output = os.path.join(msi_testfiles, 'created_test_msi_output')
+        baseline = os.path.join(msi_testfiles, 'testMSIcontrol')
+        cmd=["msi", "count_msi_samples", baseline, msi_testfiles, "-o", created_msi_output]
+        subprocess.call(cmd)
+        self.assertTrue(filecmp.cmp(expected_msi_output, created_msi_output))
+

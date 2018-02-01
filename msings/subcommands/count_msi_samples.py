@@ -18,7 +18,9 @@ from itertools import groupby, ifilter
 from operator import itemgetter
 from numpy import std, array, average, sum
 
-from msings.parsers import parse_msi
+import pandas as pd
+
+from msings.parsers import parse_msi, parse_total_mutation_burden
 from msings.utils import walker
 from msings import filters
 
@@ -38,6 +40,9 @@ def build_parser(parser):
                         help='MSI score threshold or range of two thresholds, default of 0.2')
     parser.add_argument('-p', '--pipeline_manifest', type=argparse.FileType('rU'),
                         help='Path to pipeline manifest, used for ordering output in UW pipeline specifically')    
+    parser.add_argument('-b', '--tumor_burden', 
+                        action='store_true',
+                        help='Calcuatel tumor burden. FOR INTERNAL UW USE ONLY, WILL FAIL OTHERWISE')
     parser.add_argument('-o', '--outfile', 
                         type=argparse.FileType('w'),
                         default=sys.stdout,
@@ -48,8 +53,9 @@ def action(args):
     specimens = defaultdict(dict)
     prefixes = []
     variant_keys =[]
-    files = walker(args.path)  
-    files = filter(filters.msi_file_finder,files) 
+
+    files = list(walker(args.path))
+#    files = filter(filters.msi_file_finder,files) 
     files_sorted=[]
     if args.pipeline_manifest:
         sort_order = [x['barcode_id'] for x in csv.DictReader(args.pipeline_manifest)]
@@ -60,6 +66,7 @@ def action(args):
                 files_sorted.append(pfx_file[0])
     else:
         files_sorted=files
+
     analysis_type='parse_msi'
     multiplier=args.multiplier
     if args.msi_threshold:
@@ -67,14 +74,30 @@ def action(args):
     else:
         threshold=[0.2,0.2]
     control_file = args.control_file
-    chosen_parser='{}(files_sorted, control_file, specimens, prefixes, variant_keys, multiplier,threshold)'.format(analysis_type)
-    specimens, prefixes, fieldnames, variant_keys=eval(chosen_parser)
 
-    writer = csv.DictWriter(args.outfile, fieldnames = fieldnames,  extrasaction = 'ignore', delimiter = '\t')
-    writer.writeheader()
-    for position in natsort.natsorted(specimens.keys(), reverse=True):
-        d = {k:v for k,v in zip(variant_keys,position)}  
-        d.update({pfx:specimens[position].get(pfx) for pfx in prefixes})  
-        writer.writerow(d)
+    chosen_parser='{}(files, control_file, specimens, prefixes, variant_keys, multiplier,threshold)'.format(analysis_type)
+    specimens, prefixes, variant_keys =eval(chosen_parser)
 
+    #Column headers for output 
+    fieldnames = [variant_keys] + list(prefixes) 
+
+    #list of fields to print first in output
+    msi_fields =['unstable_loci', 'passing_loci','msings_score','msi_status'] 
+
+    #only run tumor_burden at UW
+    if args.tumor_burden:
+        specimens=parse_total_mutation_burden(specimens, prefixes, files)
+        msi_fields.append('tumor_mutation_burden')
+
+    writer = csv.writer(args.outfile, delimiter = '\t')
+    writer.writerow(fieldnames)
+    
+    #next print the msi status info, then remove from dataframe
+    for info in msi_fields:
+       parsed_info = specimens['Position']==info
+       to_print=specimens[parsed_info].to_csv(args.outfile, sep='\t',header=False, index=False, columns=fieldnames, na_rep = ' ')
+       #Drop that row from specimens
+       specimens = specimens.ix[~(specimens['Position']==info)]
+
+    specimens.to_csv(args.outfile, na_rep=' ', index=False, columns=fieldnames, header=False, sep='\t')
 

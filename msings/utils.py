@@ -18,7 +18,8 @@ ASSAYS={'OPX':'OncoPlex',
         'MRW':'MarrowSeq',
         'IMD':'ImmunoPlex',
         'TESTDATA':'testdata',
-        'MSI-PLUS':'msi-plus'}
+        'MSI-PLUS':'msi-plus',
+        'MONC':'miniOnco'}
 
 def walker(dir):
     """Recursively traverse direcory `dir`. For each tuple containing
