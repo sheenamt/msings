@@ -10,6 +10,8 @@ import pprint
 import csv
 import sys
 import json
+import subprocess
+import filecmp
 
 from numpy import std, average
 from operator import itemgetter
@@ -214,3 +216,11 @@ class TestAnalyzer(TestBase):
         stdev=analyzer.calc_std_peaks(peaks)
         self.assertEqual(stdev, '0.410894')
 
+    def testCountMSI(self):
+        """Test the output creation"""
+        expected_msi_output = os.path.join(msi_testfiles, 'expected_test_msi_output')
+        created_msi_output = os.path.join(msi_testfiles, 'created_test_msi_output')
+        baseline = os.path.join(msi_testfiles, 'testMSIcontrol')
+        cmd=["msi", "count_msi_samples", baseline, msi_testfiles, "-o", created_msi_output]
+        subprocess.call(cmd)
+        self.assertTrue(filecmp.cmp(expected_msi_output, created_msi_output))
