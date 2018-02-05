@@ -55,7 +55,6 @@ def action(args):
     variant_keys =[]
 
     files = list(walker(args.path))
-#    files = filter(filters.msi_file_finder,files) 
     files_sorted=[]
     if args.pipeline_manifest:
         sort_order = [x['barcode_id'] for x in csv.DictReader(args.pipeline_manifest)]
@@ -82,7 +81,7 @@ def action(args):
     fieldnames = [variant_keys] + list(prefixes) 
 
     #list of fields to print first in output
-    msi_fields =['unstable_loci', 'passing_loci','msings_score','msi_status'] 
+    msi_fields =['unstable_loci', 'covered_loci','msings_score','msi_status'] 
 
     #only run tumor_burden at UW
     if args.tumor_burden:
@@ -91,13 +90,13 @@ def action(args):
 
     writer = csv.writer(args.outfile, delimiter = '\t')
     writer.writerow(fieldnames)
-    
+
     #next print the msi status info, then remove from dataframe
     for info in msi_fields:
        parsed_info = specimens['Position']==info
-       to_print=specimens[parsed_info].to_csv(args.outfile, sep='\t',header=False, index=False, columns=fieldnames, na_rep = ' ')
+       to_print=specimens[parsed_info].to_csv(args.outfile, sep='\t',header=False, index=False, columns=fieldnames)
        #Drop that row from specimens
        specimens = specimens.ix[~(specimens['Position']==info)]
 
-    specimens.to_csv(args.outfile, na_rep=' ', index=False, columns=fieldnames, header=False, sep='\t')
+    specimens.to_csv(args.outfile, index=False, columns=fieldnames, header=False, sep='\t',  float_format='%d')
 
