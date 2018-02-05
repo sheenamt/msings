@@ -31,8 +31,8 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
     msi_files=sorted(msi_files)    
 
     #Grab the MSI Control info
-    control_info=pd.read_csv(control_file, delimiter='\t')
-    for i in ['unstable_loci', 'passing_loci', 'msi_status', 'msings_score']:
+    control_info=pd.read_csv(control_file, delimiter='\t', dtype=object)
+    for i in ['unstable_loci', 'covered_loci', 'msi_status', 'msings_score']:
         control_info = control_info.append({'Position': i}, ignore_index=True)
 
     variant_keys = 'Position'
@@ -52,11 +52,11 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
                     pos = control_info.loc[control_info['Position']==line['Position']]
                     value = float(pos['Average_Number_Peaks']) + (multiplier * float(pos['Standard_Deviation']))
                     if int(line['Number_of_Peaks']) >= value:
-                        control_info.loc[(control_info['Position']==line['Position']), mini_pfx] = 1
+                        control_info.loc[(control_info['Position']==line['Position']), mini_pfx] = 'Unstable'
                     else:
-                        control_info.loc[(control_info['Position']==line['Position']), mini_pfx] = 0
+                        control_info.loc[(control_info['Position']==line['Position']), mini_pfx] = 'Stable'
                 else:
-                    control_info.loc[(control_info['Position']==line['Position']), mini_pfx] = None
+                    control_info.loc[(control_info['Position']==line['Position']), mini_pfx] = 'Not Covered'
 
     #Now that we're done with the control info, let's make a new dataframe with only the info we want
     specimens = control_info.copy(deep=True)
@@ -77,10 +77,11 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
         #Determine total loci in this sample
         total_loci = specimens[pfx].count()
         #Determine unstable loci in this sample
-        msi_loci = specimens[pfx].sum(skipna=True)
+        msi_loci = specimens[specimens[pfx]=='Unstable'].count()[pfx]
+
         #Add this info to the dataframe
         specimens.loc[(specimens['Position']=='unstable_loci'), pfx] = "{:.0f}".format(msi_loci)
-        specimens.loc[(specimens['Position']=='passing_loci'), pfx] = "{:.0f}".format(total_loci)
+        specimens.loc[(specimens['Position']=='covered_loci'), pfx] = "{:.0f}".format(total_loci)
         
         #Determine the MSI status, based on threshold given at CLI
         try:
@@ -92,15 +93,14 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
             # If the score is between thresholds, its indeterminate
             elif min_thres < msings_score < max_thres:
                 status = "IND"
-        #If no passing loci, its NEG
+        #If not covered loci, its NEG
         except (ZeroDivisionError, TypeError):
             status = "NEG"
             msings_score = None
-
+        
         specimens.loc[(specimens['Position']=='msi_status'), pfx] = status
         specimens.loc[(specimens['Position']=='msings_score'), pfx] = "{0:.4f}".format(msings_score)
 
-    specimens = specimens.fillna(' ')
     return specimens, prefixes, variant_keys            
 
 def parse_total_mutation_burden(specimens, prefixes, files):
