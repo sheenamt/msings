@@ -9,15 +9,12 @@ import copy
 import natsort
 import glob
 
-from itertools import count, groupby, chain, ifilter , izip_longest
+from itertools import ifilter
 from operator import itemgetter
 
 from msings import filters
 from msings.utils import munge_pfx
 import pandas as pd
-
-pd.set_option('display.max_columns', 50)
-pd.set_option('display.width', 1000)
 
 
 """Each function parses a group of sample files for desired information,
@@ -55,11 +52,11 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
                     pos = control_info.loc[control_info['Position']==line['Position']]
                     value = float(pos['Average']) + (multiplier * float(pos['Standard_Deviation']))
                     if int(line['Number_of_Peaks']) >= value:
-                        control_info.loc[(control_info['Position']==line['Position']), mini_pfx] = 1
+                        control_info.loc[(control_info['Position']==line['Position']), mini_pfx] = 'Unstable'
                     else:
-                        control_info.loc[(control_info['Position']==line['Position']), mini_pfx] = 0
+                        control_info.loc[(control_info['Position']==line['Position']), mini_pfx] = 'Stable'
                 else:
-                    control_info.loc[(control_info['Position']==line['Position']), mini_pfx] = None
+                    control_info.loc[(control_info['Position']==line['Position']), mini_pfx] = 'Not Covered'
 
     #Now that we're done with the control info, let's make a new dataframe with only the info we want
     specimens = control_info.copy(deep=True)
@@ -80,7 +77,7 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
         #Determine total loci in this sample
         total_loci = specimens[pfx].count()
         #Determine unstable loci in this sample
-        msi_loci = specimens[pfx].sum(skipna=True)
+        msi_loci = specimens[specimens[pfx]=='Unstable'].count()[pfx]
         #Add this info to the dataframe
         specimens.loc[(specimens['Position']=='unstable_loci'), pfx] = "{:.0f}".format(msi_loci)
         specimens.loc[(specimens['Position']=='passing_loci'), pfx] = "{:.0f}".format(total_loci)
