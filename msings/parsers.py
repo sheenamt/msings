@@ -75,7 +75,7 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
     #Create the interpretation based on info parsed by comparing to baseline
     for pfx in prefixes:    
         #Determine total loci in this sample
-        total_loci = specimens[pfx].count()
+        total_loci = specimens[specimens[pfx]!='Not Covered'].count()[pfx]
         #Determine unstable loci in this sample
         msi_loci = specimens[specimens[pfx]=='Unstable'].count()[pfx]
         #Add this info to the dataframe
