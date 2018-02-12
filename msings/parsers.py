@@ -36,6 +36,7 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
         control_info = control_info.append({'Position': i}, ignore_index=True)
 
     variant_keys = 'Position'
+    #Now parse each MSI file individually
     for pth in msi_files:
         pfx = munge_pfx(pth.fname)
         try:
@@ -45,10 +46,11 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
         prefixes.append(mini_pfx)
         with open(os.path.join(pth.dir, pth.fname)) as fname:
             reader = csv.DictReader(fname, delimiter='\t')
-            #Calculate whether this is MSI Stable (0), MSI Unstable (1) or not found (none), based
+            #Calculate whether this is MSI Stable, MSI Unstable, or Not Covered, based
             # on special MSI calculation
             for line in reader:
-                if int(line['Average_Depth'])>=30:  ###CHANGED FOR TESTING SHOULD BE 30!!!!!!
+                #minimum read depth of 30 to be considered as 'covered'
+                if int(line['Average_Depth'])>=30:  
                     pos = control_info.loc[control_info['Position']==line['Position']]
                     value = float(pos['Average']) + (multiplier * float(pos['Standard_Deviation']))
                     if int(line['Number_of_Peaks']) >= value:
@@ -78,7 +80,7 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
         total_loci = specimens[specimens[pfx]!='Not Covered'].count()[pfx]
         #Determine unstable loci in this sample
         msi_loci = specimens[specimens[pfx]=='Unstable'].count()[pfx]
-        #Add this info to the dataframe
+        #Add this info to the dataframe as an integer
         specimens.loc[(specimens['Position']=='unstable_loci'), pfx] = "{:.0f}".format(msi_loci)
         specimens.loc[(specimens['Position']=='passing_loci'), pfx] = "{:.0f}".format(total_loci)
         
@@ -97,6 +99,7 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
             status = "NEG"
             msings_score = None
 
+        #add the status and score to the dataframe
         specimens.loc[(specimens['Position']=='msi_status'), pfx] = status
         specimens.loc[(specimens['Position']=='msings_score'), pfx] = "{0:.4f}".format(msings_score)
 
@@ -104,7 +107,7 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
     return specimens, prefixes, variant_keys            
 
 def parse_total_mutation_burden(specimens, prefixes, files):
-    """Filter for counting as total mutation burden
+    """Filter for counting as total mutation burden, parses the SNP data file and appends info to the MSI specimens dataframe
     Variant_Type:  All coding or splice; exclude intronic, 5'UTR, 3'UTR, intergenic
     UW_Freq  less than 0.005
     1000g_All= -1 (absent)
@@ -127,6 +130,7 @@ def parse_total_mutation_burden(specimens, prefixes, files):
     snp_files = ifilter(filters.snp_analysis,files) 
     snp_files=sorted(snp_files) 
     
+    #Do not die, or add 'tumor_mutation_burden' info if there are no SNP tabs, which will always happen if run outside UW
     if len(snp_files) == 0:
         print "cannot calculate tumor burden outside UW"
         return specimens
@@ -149,6 +153,7 @@ def parse_total_mutation_burden(specimens, prefixes, files):
                 for vtype in line['Variant_Type'].split(','):
                     if vtype.strip() in variant_to_include and line['1000g_ALL']=='-1' and float(line['UW_Freq'])<=0.005 and line['EXAC']=='-1' and int(line['Var_Reads'])>=8:
                         count+=1
+        #TMB is considered as # of SNPs that passed the filter compared to total # of snps reviewed. 
         tmb = str(count)+"/"+str(total_count)
         specimens.loc[(specimens['Position']=='tumor_mutation_burden'), mini_pfx] = tmb
 

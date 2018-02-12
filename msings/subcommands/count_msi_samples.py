@@ -76,7 +76,7 @@ def action(args):
     writer = csv.writer(args.outfile, delimiter = '\t')
     writer.writerow(fieldnames)
     
-    #next print the msi status info, then remove from dataframe
+    #next print the msi status info, then remove from dataframe before printing each loci detail
     for info in msi_fields:
        parsed_info = specimens['Position']==info
        to_print=specimens[parsed_info].to_csv(args.outfile, sep='\t',header=False, index=False, columns=fieldnames, na_rep = ' ')
