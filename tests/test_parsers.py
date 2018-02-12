@@ -10,7 +10,9 @@ import pprint
 import sys
 import json
 import csv
+import pandas as pd
 
+from pandas.util.testing import assert_frame_equal # <-- for testing dataframes
 from operator import itemgetter
 from itertools import ifilter
 from collections import namedtuple, defaultdict
@@ -52,3 +54,20 @@ class TestParsers(TestBase):
         self.assertListEqual(sorted(fieldnames), sorted(['0228T', '5437_NA12878', '6037_NA12878', 'Position']))
         self.assertListEqual(variant_keys, ['Position'])
         
+
+    def testTumorMutationBurden(self):
+        specimens = pd.DataFrame()
+        d = [{'Position':'tumor_mutation_burden','0228T':'10/3006'}]
+        expectedDF = pd.DataFrame(data=d)
+        prefixes = []
+        files = walker(testMSIfile)
+        specimens = parsers.parse_total_mutation_burden(specimens, prefixes, files)
+        #ensure columns are the same
+        self.assertListEqual(sorted(expectedDF.columns), sorted(specimens.columns))
+        #Ensure 'position' was added'
+        self.assertItemsEqual(sorted(expectedDF["Position"]), sorted(specimens["Position"]))
+        #Ensure calculation is correct
+        self.assertItemsEqual(sorted(expectedDF["0228T"]), sorted(specimens["0228T"]))
+
+
+
