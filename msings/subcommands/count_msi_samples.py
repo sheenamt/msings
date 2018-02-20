@@ -60,7 +60,7 @@ def action(args):
         threshold=[0.2,0.2]
     control_file = args.control_file
     chosen_parser='{}(files, control_file, specimens, prefixes, variant_keys, multiplier,threshold)'.format(analysis_type)
-    specimens, prefixes, variant_keys =eval(chosen_parser)
+    df_specimens, prefixes, variant_keys =eval(chosen_parser)
 
     #Column headers for output 
     fieldnames = [variant_keys] + list(prefixes) 
@@ -70,7 +70,7 @@ def action(args):
 
     #only run tumor_burden at UW
     if args.tumor_burden:
-        specimens=parse_total_mutation_burden(specimens, prefixes, files)
+        df_specimens=parse_total_mutation_burden(df_specimens, prefixes, files)
         msi_fields.append('tumor_mutation_burden')
 
     writer = csv.writer(args.outfile, delimiter = '\t')
@@ -78,10 +78,10 @@ def action(args):
     
     #next print the msi status info, then remove from dataframe before printing each loci detail
     for info in msi_fields:
-       parsed_info = specimens['Position']==info
-       to_print=specimens[parsed_info].to_csv(args.outfile, sep='\t',header=False, index=False, columns=fieldnames, na_rep = ' ')
+       parsed_info = df_specimens['Position']==info
+       to_print=df_specimens[parsed_info].to_csv(args.outfile, sep='\t',header=False, index=False, columns=fieldnames, na_rep = ' ')
        #Drop that row from specimens
-       specimens = specimens.ix[~(specimens['Position']==info)]
+       df_specimens = df_specimens.ix[~(df_specimens['Position']==info)]
 
-    specimens.to_csv(args.outfile, na_rep=' ', index=False, columns=fieldnames, header=False, sep='\t')
+    df_specimens.to_csv(args.outfile, na_rep=' ', index=False, columns=fieldnames, header=False, sep='\t')
 
