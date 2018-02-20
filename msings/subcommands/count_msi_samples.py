@@ -66,7 +66,7 @@ def action(args):
     fieldnames = [variant_keys] + list(prefixes) 
 
     #list of fields to print first in output
-    msi_fields =['unstable_loci', 'passing_loci','msings_score','msi_status'] 
+    msi_fields =['unstable_loci', 'covered_loci','msings_score','msi_status'] 
 
     #only run tumor_burden at UW
     if args.tumor_burden:

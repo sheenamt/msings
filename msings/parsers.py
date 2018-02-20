@@ -34,7 +34,7 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
 
     #Grab the MSI Control info
     df_control_info=pd.read_csv(control_file, delimiter='\t')
-    for i in ['unstable_loci', 'passing_loci', 'msi_status', 'msings_score']:
+    for i in ['unstable_loci', 'covered_loci', 'msi_status', 'msings_score']:
         df_control_info = df_control_info.append({'Position': i}, ignore_index=True)
 
     variant_keys = 'Position'
@@ -77,7 +77,7 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
         msi_loci = df_specimens[df_specimens[pfx]=='Unstable'].count()[pfx]
         #Add this info to the dataframe as an integer
         df_specimens.loc[(df_specimens['Position']=='unstable_loci'), pfx] = "{:.0f}".format(msi_loci)
-        df_specimens.loc[(df_specimens['Position']=='passing_loci'), pfx] = "{:.0f}".format(total_loci)
+        df_specimens.loc[(df_specimens['Position']=='covered_loci'), pfx] = "{:.0f}".format(total_loci)
         
         #Determine the MSI status, based on threshold given at CLI
         try:
