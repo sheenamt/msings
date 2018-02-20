@@ -53,12 +53,14 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
             for line in reader:
                 #minimum read depth of 30 to be considered as 'covered'
                 if int(line['Average_Depth'])>=AVERAGE_DEPTH_THRESHOLD:  
-                    pos = df_control_info.loc[df_control_info['Position']==line['Position']]
-                    value = float(pos['Average']) + (multiplier * float(pos['Standard_Deviation']))
-                    if int(line['Number_of_Peaks']) >= value:
-                        df_control_info.loc[(df_control_info['Position']==line['Position']), mini_pfx] = 'Unstable'
-                    else:
-                        df_control_info.loc[(df_control_info['Position']==line['Position']), mini_pfx] = 'Stable'
+                    df_pos = df_control_info.loc[df_control_info['Position']==line['Position']]
+                    #df_pos is empty if sample has line not in control or vice versa
+                    if not df_pos.empty:
+                        value = float(df_pos['Average']) + (multiplier * float(df_pos['Standard_Deviation']))
+                        if int(line['Number_of_Peaks']) >= value:
+                            df_control_info.loc[(df_control_info['Position']==line['Position']), mini_pfx] = 'Unstable'
+                        else:
+                            df_control_info.loc[(df_control_info['Position']==line['Position']), mini_pfx] = 'Stable'
                 else:
                     df_control_info.loc[(df_control_info['Position']==line['Position']), mini_pfx] = 'Not Covered'
 
