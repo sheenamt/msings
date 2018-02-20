@@ -34,7 +34,7 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
 
     #Grab the MSI Control info
     df_control_info=pd.read_csv(control_file, delimiter='\t')
-    for i in ['unstable_loci', 'passing_loci', 'msi_status', 'msings_score']:
+    for i in ['unstable_loci', 'covered_loci', 'msi_status', 'msings_score']:
         df_control_info = df_control_info.append({'Position': i}, ignore_index=True)
 
     variant_keys = 'Position'
@@ -54,7 +54,7 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
                 #minimum read depth of 30 to be considered as 'covered'
                 if int(line['Average_Depth'])>=AVERAGE_DEPTH_THRESHOLD:  
                     pos = df_control_info.loc[df_control_info['Position']==line['Position']]
-                    value = float(pos['Average']) + (multiplier * float(pos['Standard_Deviation']))
+                    value = float(pos['Average_Number_Peaks']) + (multiplier * float(pos['Standard_Deviation']))
                     if int(line['Number_of_Peaks']) >= value:
                         df_control_info.loc[(df_control_info['Position']==line['Position']), mini_pfx] = 'Unstable'
                     else:
@@ -64,7 +64,7 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
 
     #Now that we're done with the control info, let's make a new dataframe with only the info we want
     df_specimens = df_control_info.copy(deep=True)
-    df_specimens = df_specimens.drop(columns=['Standard_Deviation', 'Average', 'Count'])
+    df_specimens = df_specimens.drop(columns=['Standard_Deviation', 'Average_Number_Peaks', 'Count'])
 
     #get max and min threshold
     min_thres, max_thres = parse_thresholds(threshold)
@@ -77,8 +77,8 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
         msi_loci = df_specimens[df_specimens[pfx]=='Unstable'].count()[pfx]
         #Add this info to the dataframe as an integer
         df_specimens.loc[(df_specimens['Position']=='unstable_loci'), pfx] = "{:.0f}".format(msi_loci)
-        df_specimens.loc[(df_specimens['Position']=='passing_loci'), pfx] = "{:.0f}".format(total_loci)
-        
+        df_specimens.loc[(df_specimens['Position']=='covered_loci'), pfx] = "{:.0f}".format(total_loci)
+
         #Determine the MSI status, based on threshold given at CLI
         try:
             msings_score=float(msi_loci)/total_loci
