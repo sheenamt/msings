@@ -22,6 +22,8 @@ grouping based on the variant_keys list,
 some include additional annotation headers,
 sample counts, and scores calculated based on counts
 """
+#Require average depth of a loci to be 30 to considered 'covered'
+AVERAGE_DEPTH_THRESHOLD=30
 
 def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier, threshold):
     """Compare the sample-msi output to the baseline file, report
@@ -31,9 +33,9 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
     msi_files=sorted(msi_files)    
 
     #Grab the MSI Control info
-    control_info=pd.read_csv(control_file, delimiter='\t')
+    df_control_info=pd.read_csv(control_file, delimiter='\t')
     for i in ['unstable_loci', 'passing_loci', 'msi_status', 'msings_score']:
-        control_info = control_info.append({'Position': i}, ignore_index=True)
+        df_control_info = df_control_info.append({'Position': i}, ignore_index=True)
 
     variant_keys = 'Position'
     #Now parse each MSI file individually
@@ -50,39 +52,32 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
             # on special MSI calculation
             for line in reader:
                 #minimum read depth of 30 to be considered as 'covered'
-                if int(line['Average_Depth'])>=30:  
-                    pos = control_info.loc[control_info['Position']==line['Position']]
+                if int(line['Average_Depth'])>=AVERAGE_DEPTH_THRESHOLD:  
+                    pos = df_control_info.loc[df_control_info['Position']==line['Position']]
                     value = float(pos['Average']) + (multiplier * float(pos['Standard_Deviation']))
                     if int(line['Number_of_Peaks']) >= value:
-                        control_info.loc[(control_info['Position']==line['Position']), mini_pfx] = 'Unstable'
+                        df_control_info.loc[(df_control_info['Position']==line['Position']), mini_pfx] = 'Unstable'
                     else:
-                        control_info.loc[(control_info['Position']==line['Position']), mini_pfx] = 'Stable'
+                        df_control_info.loc[(df_control_info['Position']==line['Position']), mini_pfx] = 'Stable'
                 else:
-                    control_info.loc[(control_info['Position']==line['Position']), mini_pfx] = 'Not Covered'
+                    df_control_info.loc[(df_control_info['Position']==line['Position']), mini_pfx] = 'Not Covered'
 
     #Now that we're done with the control info, let's make a new dataframe with only the info we want
-    specimens = control_info.copy(deep=True)
-    specimens = specimens.drop(columns=['Standard_Deviation', 'Average', 'Count'])
+    df_specimens = df_control_info.copy(deep=True)
+    df_specimens = df_specimens.drop(columns=['Standard_Deviation', 'Average', 'Count'])
 
-    #Parse the user defined thresholds:
-    if len(threshold) == 1:
-        min_thres=float(threshold)
-        max_thres=float(threshold)
-    elif len(threshold) == 2:
-        min_thres=float(min(threshold))
-        max_thres=float(max(threshold))
-    else:
-        sys.exit("Wrong number of -t thresholds given")
-        
+    #get max and min threshold
+    min_thres, max_thres = parse_thresholds(threshold)
+
     #Create the interpretation based on info parsed by comparing to baseline
     for pfx in prefixes:    
         #Determine total loci in this sample
-        total_loci = specimens[specimens[pfx]!='Not Covered'].count()[pfx]
+        total_loci = df_specimens[df_specimens[pfx]!='Not Covered'].count()[pfx]
         #Determine unstable loci in this sample
-        msi_loci = specimens[specimens[pfx]=='Unstable'].count()[pfx]
+        msi_loci = df_specimens[df_specimens[pfx]=='Unstable'].count()[pfx]
         #Add this info to the dataframe as an integer
-        specimens.loc[(specimens['Position']=='unstable_loci'), pfx] = "{:.0f}".format(msi_loci)
-        specimens.loc[(specimens['Position']=='passing_loci'), pfx] = "{:.0f}".format(total_loci)
+        df_specimens.loc[(df_specimens['Position']=='unstable_loci'), pfx] = "{:.0f}".format(msi_loci)
+        df_specimens.loc[(df_specimens['Position']=='passing_loci'), pfx] = "{:.0f}".format(total_loci)
         
         #Determine the MSI status, based on threshold given at CLI
         try:
@@ -100,19 +95,42 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
             msings_score = None
 
         #add the status and score to the dataframe
-        specimens.loc[(specimens['Position']=='msi_status'), pfx] = status
-        specimens.loc[(specimens['Position']=='msings_score'), pfx] = "{0:.4f}".format(msings_score)
+        df_specimens.loc[(df_specimens['Position']=='msi_status'), pfx] = status
+        df_specimens.loc[(df_specimens['Position']=='msings_score'), pfx] = "{0:.4f}".format(msings_score)
 
-    specimens = specimens.fillna(' ')
-    return specimens, prefixes, variant_keys            
+    df_specimens = df_specimens.fillna(' ')
+    return df_specimens, prefixes, variant_keys            
 
-def parse_total_mutation_burden(specimens, prefixes, files):
-    """Filter for counting as total mutation burden, parses the SNP data file and appends info to the MSI specimens dataframe
+def parse_thresholds(threshold_list):
+    """ Parse the user defined threshold list"""
+
+    if len(threshold_list) == 1:
+        min_thres=float(threshold_list[0])
+        max_thres=float(threshold_list[0])
+    elif len(threshold_list) == 2:
+        min_thres=float(min(threshold_list))
+        max_thres=float(max(threshold_list))
+    else:
+        raise ValueError("Wrong number of -t thresholds given")
+    return min_thres, max_thres
+
+def opx_bro_filter(vtype, variant_to_include, line):
+    """ Filter for OPX and BRO assays 
     Variant_Type:  All coding or splice; exclude intronic, 5'UTR, 3'UTR, intergenic
     UW_Freq  less than 0.005
     1000g_All= -1 (absent)
     ExAC = -1 (absent)
-    Var_reads >8
+    Var_reads >=8
+    """
+
+    return vtype.strip() in variant_to_include \
+        and line['1000g_ALL']=='-1' \
+        and float(line['UW_Freq'])<=0.005 \
+        and line['EXAC']=='-1' \
+        and int(line['Var_Reads'])>=8
+
+def parse_total_mutation_burden(df_specimens, prefixes, files):
+    """Filter for counting as total mutation burden, parses the SNP data file and appends info to the MSI specimens dataframe
     """
     variant_to_include = ['frameshift insertion',
                           'frameshift deletion',
@@ -133,9 +151,9 @@ def parse_total_mutation_burden(specimens, prefixes, files):
     #Do not die, or add 'tumor_mutation_burden' info if there are no SNP tabs, which will always happen if run outside UW
     if len(snp_files) == 0:
         print "cannot calculate tumor burden outside UW"
-        return specimens
+        return df_specimens
 
-    specimens = specimens.append({'Position': 'tumor_mutation_burden'}, ignore_index=True)
+    df_specimens = df_specimens.append({'Position': 'tumor_mutation_burden'}, ignore_index=True)
 
     #Determine total mutation burden, for use internally at UW
     for pth in snp_files:
@@ -151,10 +169,13 @@ def parse_total_mutation_burden(specimens, prefixes, files):
             for line in reader:
                 total_count+=1
                 for vtype in line['Variant_Type'].split(','):
-                    if vtype.strip() in variant_to_include and line['1000g_ALL']=='-1' and float(line['UW_Freq'])<=0.005 and line['EXAC']=='-1' and int(line['Var_Reads'])>=8:
+                    if opx_bro_filter(vtype, variant_to_include, line):
                         count+=1
         #TMB is considered as # of SNPs that passed the filter compared to total # of snps reviewed. 
-        tmb = str(count)+"/"+str(total_count)
-        specimens.loc[(specimens['Position']=='tumor_mutation_burden'), mini_pfx] = tmb
+        tmb = '{}/{}'.format(count, total_count)
+        df_specimens.loc[(df_specimens['Position']=='tumor_mutation_burden'), mini_pfx] = tmb
 
-    return specimens
+    return df_specimens
+
+
+
