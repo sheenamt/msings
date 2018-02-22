@@ -64,7 +64,7 @@ class TestParsers(TestBase):
 
     def testTumorMutationBurden(self):
         specimens = pd.DataFrame()
-        d = [{'Position':'tumor_mutation_burden','0228T':'10/3006'}]
+        d = [{'Position':'tumor_mutation_burden','0228T':'6/3006'}]
         expectedDF = pd.DataFrame(data=d)
         prefixes = []
         files = walker(testMSIfile)
@@ -81,28 +81,27 @@ class TestParsers(TestBase):
         variant_to_include=['frameshift insertion', 'frameshift deletion', 'frameshift block substitution', 'stopgain', 
                              'stoploss', 'nonframeshift insertion', 'nonframeshift deletion', 
                              'nonframeshift block substitution', 'nonsynonymous SNV', 'synonymous SNV', 'exonic', 'splicing']
-        vtype='exonic'
         uw_freq_P={'UW_Freq': '0.0005','EXAC': '-1',  'Var_Reads': '8','1000g_ALL': '-1', 'Variant_Type': 'frameshift deletion,exonic'}
         uw_freq_F={'UW_Freq': '0.5','EXAC': '-1',  'Var_Reads': '8','1000g_ALL': '-1', 'Variant_Type': 'frameshift deletion,exonic'}
         exac_P={'UW_Freq': '0.0005','EXAC': '-1',  'Var_Reads': '8','1000g_ALL': '-1', 'Variant_Type': 'frameshift deletion,exonic'}
         exac_F={'UW_Freq': '0.0005','EXAC': '0.5',  'Var_Reads': '8','1000g_ALL': '-1', 'Variant_Type': 'frameshift deletion,exonic'}
-        var_reads_P={'UW_Freq': '0.0005','EXAC': '-1',  'Var_Reads': '8','1000g_ALL': '-1', 'Variant_Type': 'frameshift deletion,exonic'}
+        var_reads_P={'UW_Freq': '0.0005','EXAC': '-1',  'Var_Reads': '8','1000g_ALL': '-1', 'Variant_Type': 'frameshift deletion,exonic, intronic'}
         var_reads_F={'UW_Freq': '0.0005','EXAC': '-1',  'Var_Reads': '4','1000g_ALL': '-1', 'Variant_Type': 'frameshift deletion,exonic'}
         thouG_P={'UW_Freq': '0.0005','EXAC': '-1',  'Var_Reads': '8','1000g_ALL': '-1', 'Variant_Type': 'frameshift deletion,exonic'}
         thouG_F={'UW_Freq': '0.0005','EXAC': '-1',  'Var_Reads': '8','1000g_ALL': '0.5', 'Variant_Type': 'frameshift deletion,exonic'}
         var_type_P={'UW_Freq': '0.0005','EXAC': '-1',  'Var_Reads': '8','1000g_ALL': '-1', 'Variant_Type': 'frameshift deletion,exonic'}
         var_type_F={'UW_Freq': '0.0005','EXAC': '-1',  'Var_Reads': '8','1000g_ALL': '-1', 'Variant_Type': 'intronic'}
 
-        self.assertTrue(parsers.opx_bro_filter(vtype, variant_to_include, uw_freq_P))
-        self.assertFalse(parsers.opx_bro_filter(vtype, variant_to_include, uw_freq_F))
-        self.assertTrue(parsers.opx_bro_filter(vtype, variant_to_include, exac_P))
-        self.assertFalse(parsers.opx_bro_filter(vtype, variant_to_include, exac_F))
-        self.assertTrue(parsers.opx_bro_filter(vtype, variant_to_include, var_reads_P))
-        self.assertFalse(parsers.opx_bro_filter(vtype, variant_to_include, var_reads_F))
-        self.assertTrue(parsers.opx_bro_filter(vtype, variant_to_include, thouG_P))
-        self.assertFalse(parsers.opx_bro_filter(vtype, variant_to_include, thouG_F))
-        self.assertTrue(parsers.opx_bro_filter(vtype, variant_to_include, var_type_P))
-        self.assertFalse(parsers.opx_bro_filter('intronic', variant_to_include, var_type_F))
+        self.assertTrue(parsers.opx_bro_filter(variant_to_include, uw_freq_P))
+        self.assertFalse(parsers.opx_bro_filter(variant_to_include, uw_freq_F))
+        self.assertTrue(parsers.opx_bro_filter(variant_to_include, exac_P))
+        self.assertFalse(parsers.opx_bro_filter(variant_to_include, exac_F))
+        self.assertTrue(parsers.opx_bro_filter(variant_to_include, var_reads_P))
+        self.assertFalse(parsers.opx_bro_filter(variant_to_include, var_reads_F))
+        self.assertTrue(parsers.opx_bro_filter(variant_to_include, thouG_P))
+        self.assertFalse(parsers.opx_bro_filter(variant_to_include, thouG_F))
+        self.assertTrue(parsers.opx_bro_filter(variant_to_include, var_type_P))
+        self.assertFalse(parsers.opx_bro_filter(variant_to_include, var_type_F))
 
 
 
