@@ -16,6 +16,7 @@ from msings import filters
 from msings.utils import munge_pfx
 import pandas as pd
 
+
 """Each function parses a group of sample files for desired information,
 grouping based on the variant_keys list,
 some include additional annotation headers,
@@ -27,7 +28,6 @@ AVERAGE_DEPTH_THRESHOLD=30
 def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier, threshold):
     """Compare the sample-msi output to the baseline file, report
     Total sites, MSI+ sites and msings score"""
-
     #Grab the MSI files
     msi_files = ifilter(filters.msi_file_finder,files) 
     msi_files=sorted(msi_files)    
@@ -80,7 +80,7 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
         #Add this info to the dataframe as an integer
         df_specimens.loc[(df_specimens['Position']=='unstable_loci'), pfx] = "{:.0f}".format(msi_loci)
         df_specimens.loc[(df_specimens['Position']=='covered_loci'), pfx] = "{:.0f}".format(total_loci)
-
+        
         #Determine the MSI status, based on threshold given at CLI
         try:
             msings_score=float(msi_loci)/total_loci
@@ -91,7 +91,7 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
             # If the score is between thresholds, its indeterminate
             elif min_thres < msings_score < max_thres:
                 status = "IND"
-        #If not covered loci, its NEG
+        #If no passing loci, its NEG
         except (ZeroDivisionError, TypeError):
             status = "NEG"
             msings_score = None
@@ -116,7 +116,7 @@ def parse_thresholds(threshold_list):
         raise ValueError("Wrong number of -t thresholds given")
     return min_thres, max_thres
 
-def opx_bro_filter(vtype, variant_to_include, line):
+def opx_bro_filter(variant_to_include, line):
     """ Filter for OPX and BRO assays 
     Variant_Type:  All coding or splice; exclude intronic, 5'UTR, 3'UTR, intergenic
     UW_Freq  less than 0.005
@@ -125,11 +125,16 @@ def opx_bro_filter(vtype, variant_to_include, line):
     Var_reads >=8
     """
 
-    return vtype.strip() in variant_to_include \
-        and line['1000g_ALL']=='-1' \
-        and float(line['UW_Freq'])<=0.005 \
-        and line['EXAC']=='-1' \
-        and int(line['Var_Reads'])>=8
+    for vtype in line['Variant_Type'].split(','):
+        if vtype.strip() in variant_to_include \
+           and int(line['Var_Reads'])>=8 \
+           and line['1000g_ALL']=='-1' \
+           and float(line['UW_Freq'])<=0.005 \
+           and float(line['Allele_Frac']) >=0.05 \
+           and line['EXAC']=='-1' :
+            return True
+
+
 
 def parse_total_mutation_burden(df_specimens, prefixes, files):
     """Filter for counting as total mutation burden, parses the SNP data file and appends info to the MSI specimens dataframe
@@ -170,9 +175,8 @@ def parse_total_mutation_burden(df_specimens, prefixes, files):
             total_count = 0
             for line in reader:
                 total_count+=1
-                for vtype in line['Variant_Type'].split(','):
-                    if opx_bro_filter(vtype, variant_to_include, line):
-                        count+=1
+                if opx_bro_filter(variant_to_include, line):
+                    count+=1
         #TMB is considered as # of SNPs that passed the filter compared to total # of snps reviewed. 
         tmb = '{}/{}'.format(count, total_count)
         df_specimens.loc[(df_specimens['Position']=='tumor_mutation_burden'), mini_pfx] = tmb
