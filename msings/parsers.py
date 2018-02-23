@@ -132,6 +132,7 @@ def opx_bro_filter(variant_to_include, line):
            and float(line['UW_Freq'])<=0.005 \
            and line['Cosmic'] == '' \
            and line ['ClinVar'] == '' \
+           and float(line['Allele_Frac']) >=0.05 \
            and line['EXAC']=='-1' :
             return True
 
