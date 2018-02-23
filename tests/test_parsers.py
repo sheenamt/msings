@@ -81,27 +81,23 @@ class TestParsers(TestBase):
         variant_to_include=['frameshift insertion', 'frameshift deletion', 'frameshift block substitution', 'stopgain', 
                              'stoploss', 'nonframeshift insertion', 'nonframeshift deletion', 
                              'nonframeshift block substitution', 'nonsynonymous SNV', 'synonymous SNV', 'exonic', 'splicing']
-        uw_freq_P={'UW_Freq': '0.0005','EXAC': '-1',  'Var_Reads': '8','1000g_ALL': '-1', 'Variant_Type': 'frameshift deletion,exonic'}
-        uw_freq_F={'UW_Freq': '0.5','EXAC': '-1',  'Var_Reads': '8','1000g_ALL': '-1', 'Variant_Type': 'frameshift deletion,exonic'}
-        exac_P={'UW_Freq': '0.0005','EXAC': '-1',  'Var_Reads': '8','1000g_ALL': '-1', 'Variant_Type': 'frameshift deletion,exonic'}
-        exac_F={'UW_Freq': '0.0005','EXAC': '0.5',  'Var_Reads': '8','1000g_ALL': '-1', 'Variant_Type': 'frameshift deletion,exonic'}
-        var_reads_P={'UW_Freq': '0.0005','EXAC': '-1',  'Var_Reads': '8','1000g_ALL': '-1', 'Variant_Type': 'frameshift deletion,exonic, intronic'}
-        var_reads_F={'UW_Freq': '0.0005','EXAC': '-1',  'Var_Reads': '4','1000g_ALL': '-1', 'Variant_Type': 'frameshift deletion,exonic'}
-        thouG_P={'UW_Freq': '0.0005','EXAC': '-1',  'Var_Reads': '8','1000g_ALL': '-1', 'Variant_Type': 'frameshift deletion,exonic'}
-        thouG_F={'UW_Freq': '0.0005','EXAC': '-1',  'Var_Reads': '8','1000g_ALL': '0.5', 'Variant_Type': 'frameshift deletion,exonic'}
-        var_type_P={'UW_Freq': '0.0005','EXAC': '-1',  'Var_Reads': '8','1000g_ALL': '-1', 'Variant_Type': 'frameshift deletion,exonic'}
-        var_type_F={'UW_Freq': '0.0005','EXAC': '-1',  'Var_Reads': '8','1000g_ALL': '-1', 'Variant_Type': 'intronic'}
+        PASS={'UW_Freq': '0.0005','EXAC': '-1',  'Var_Reads': '8','1000g_ALL': '-1', 'Variant_Type': 'frameshift deletion,exonic','ClinVar':'', 'Cosmic':''}
+        uw_freq_F={'UW_Freq': '0.5','EXAC': '-1',  'Var_Reads': '8','1000g_ALL': '-1', 'Variant_Type': 'frameshift deletion,exonic','ClinVar':'', 'Cosmic':''}
+        exac_F={'UW_Freq': '0.0005','EXAC': '0.5',  'Var_Reads': '8','1000g_ALL': '-1', 'Variant_Type': 'frameshift deletion,exonic','ClinVar':'', 'Cosmic':''}
+        var_reads_F={'UW_Freq': '0.0005','EXAC': '-1',  'Var_Reads': '4','1000g_ALL': '-1', 'Variant_Type': 'frameshift deletion,exonic','ClinVar':'', 'Cosmic':''}
+        thouG_F={'UW_Freq': '0.0005','EXAC': '-1',  'Var_Reads': '8','1000g_ALL': '0.5', 'Variant_Type': 'frameshift deletion,exonic','ClinVar':'', 'Cosmic':''}
+        var_type_F={'UW_Freq': '0.0005','EXAC': '-1',  'Var_Reads': '8','1000g_ALL': '-1', 'Variant_Type': 'intronic','ClinVar':'', 'Cosmic':''}
+        clinvar_F={'UW_Freq': '0.0005','EXAC': '-1',  'Var_Reads': '8','1000g_ALL': '-1', 'Variant_Type': 'intronic', 'ClinVar':'CLINSIG=non-pathogenic;CLNDBN=not_specified;CLNREVSTAT=criteria_provided\x2c_single_submitter;CLNACC=RCV000153514.2;CLNDSDB=MedGen;CLNDSDBID=CN169374', 'Cosmic':''}
+        cosmic_F={'UW_Freq': '0.0005','EXAC': '-1',  'Var_Reads': '8','1000g_ALL': '-1', 'Variant_Type': 'intronic','ClinVar':'', 'Cosmic':'ID=COSM3773408;OCCURENCE=1(kidney),2(thyroid)'}
 
-        self.assertTrue(parsers.opx_bro_filter(variant_to_include, uw_freq_P))
+        self.assertTrue(parsers.opx_bro_filter(variant_to_include, PASS))
         self.assertFalse(parsers.opx_bro_filter(variant_to_include, uw_freq_F))
-        self.assertTrue(parsers.opx_bro_filter(variant_to_include, exac_P))
         self.assertFalse(parsers.opx_bro_filter(variant_to_include, exac_F))
-        self.assertTrue(parsers.opx_bro_filter(variant_to_include, var_reads_P))
         self.assertFalse(parsers.opx_bro_filter(variant_to_include, var_reads_F))
-        self.assertTrue(parsers.opx_bro_filter(variant_to_include, thouG_P))
         self.assertFalse(parsers.opx_bro_filter(variant_to_include, thouG_F))
-        self.assertTrue(parsers.opx_bro_filter(variant_to_include, var_type_P))
         self.assertFalse(parsers.opx_bro_filter(variant_to_include, var_type_F))
+        self.assertFalse(parsers.opx_bro_filter(variant_to_include, cosmic_F))
+        self.assertFalse(parsers.opx_bro_filter(variant_to_include, clinvar_F))
 
 
 

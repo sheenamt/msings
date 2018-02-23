@@ -130,6 +130,8 @@ def opx_bro_filter(variant_to_include, line):
            and int(line['Var_Reads'])>=8 \
            and line['1000g_ALL']=='-1' \
            and float(line['UW_Freq'])<=0.005 \
+           and line['Cosmic'] == '' \
+           and line ['ClinVar'] == '' \
            and line['EXAC']=='-1' :
             return True
 
