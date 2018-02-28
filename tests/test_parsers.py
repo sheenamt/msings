@@ -64,7 +64,7 @@ class TestParsers(TestBase):
 
     def testTumorMutationBurden(self):
         specimens = pd.DataFrame()
-        d = [{'Position':'tumor_mutation_burden','0228T':'1/3006'}]
+        d = [{'Position':'tumor_mutation_burden_beta_v1.5','0228T':'1/3006'}]
         expectedDF = pd.DataFrame(data=d)
         prefixes = []
         files = walker(testMSIfile)
