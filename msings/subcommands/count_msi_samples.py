@@ -71,7 +71,7 @@ def action(args):
     #only run tumor_burden at UW
     if args.tumor_burden:
         df_specimens=parse_total_mutation_burden(df_specimens, prefixes, files)
-        msi_fields.append('tumor_mutation_burden')
+        msi_fields.append('tumor_mutation_burden_beta_v1.5')
 
     writer = csv.writer(args.outfile, delimiter = '\t')
     writer.writerow(fieldnames)

@@ -132,7 +132,7 @@ def opx_bro_filter(variant_to_include, line):
            and float(line['UW_Freq'])<=0.005 \
            and line['Cosmic'] == '' \
            and line ['ClinVar'] == '' \
-           and float(line['Allele_Frac']) >=0.05 \
+           and float(line['Allele_Frac'])>=0.05 \
            and line['EXAC']=='-1' :
             return True
 
@@ -162,7 +162,7 @@ def parse_total_mutation_burden(df_specimens, prefixes, files):
         print "cannot calculate tumor burden outside UW"
         return df_specimens
 
-    df_specimens = df_specimens.append({'Position': 'tumor_mutation_burden'}, ignore_index=True)
+    df_specimens = df_specimens.append({'Position': 'tumor_mutation_burden_beta_v1.5'}, ignore_index=True)
 
     #Determine total mutation burden, for use internally at UW
     for pth in snp_files:
@@ -181,7 +181,7 @@ def parse_total_mutation_burden(df_specimens, prefixes, files):
                     count+=1
         #TMB is considered as # of SNPs that passed the filter compared to total # of snps reviewed. 
         tmb = '{}/{}'.format(count, total_count)
-        df_specimens.loc[(df_specimens['Position']=='tumor_mutation_burden'), mini_pfx] = tmb
+        df_specimens.loc[(df_specimens['Position']=='tumor_mutation_burden_beta_v1.5'), mini_pfx] = tmb
 
     return df_specimens
 
