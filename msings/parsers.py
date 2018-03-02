@@ -98,7 +98,12 @@ def parse_msi(files, control_file, specimens, prefixes, variant_keys, multiplier
 
         #add the status and score to the dataframe
         df_specimens.loc[(df_specimens['Position']=='msi_status'), pfx] = status
-        df_specimens.loc[(df_specimens['Position']=='msings_score'), pfx] = "{0:.4f}".format(msings_score)
+        #If this sample has no unstable MSI loci, the score will be None 
+        if msings_score:
+            df_specimens.loc[(df_specimens['Position']=='msings_score'), pfx] = "{0:.4f}".format(msings_score)
+        else:
+            df_specimens.loc[(df_specimens['Position']=='msings_score'), pfx] = msings_score
+
 
     df_specimens = df_specimens.fillna(' ')
     return df_specimens, prefixes, variant_keys            
