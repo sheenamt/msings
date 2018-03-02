@@ -1,5 +1,5 @@
 """
-Create the summary file of your choice
+Create the summary file of all MSI_Analysis files in folder, requires output of count_msi_samples for each sample. No recalculation happening in this script.
 
 Usage:
 

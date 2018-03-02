@@ -1,9 +1,9 @@
 """
-Create msi output file with MSI location counts for multiple samples
+Create msi output file with MSI location counts, can be used to create output for one or many samples
 
 Usage:
 
-msi count_msi_samples  /path/to/baseline/file /path/to/sample/files -m 2.5 -t 0.1 0.7 -o output_file
+msi count_msi_samples  /path/to/baseline/file /path/to/sample/file -m 2.5 -t 0.1 0.7 -o output_file
 
 """
 import os
@@ -88,7 +88,8 @@ def action(args):
         df_specimens=parse_total_mutation_burden(df_specimens, prefixes, files)
         msi_fields.append('tumor_mutation_burden')
 
-    writer = csv.writer(args.outfile, delimiter = '\t')
+    writer = csv.writer(args.outfile,delimiter = '\t')
+    fieldnames.strip()
     writer.writerow(fieldnames)
     
     #next print the msi status info, then remove from dataframe before printing each loci detail
