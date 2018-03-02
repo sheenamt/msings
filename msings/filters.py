@@ -16,3 +16,9 @@ def snp_analysis(pth):
     True only for pfx.Analysis.{txt,csv}
     """
     return bool(pth.fname.endswith('SNP_Analysis.txt'))
+
+def msi_analysis(pth):
+    """
+    True only for pfx.Analysis.{txt,csv}
+    """
+    return bool(pth.fname.endswith('MSI_Analysis.txt'))
