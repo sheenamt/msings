@@ -3,6 +3,7 @@ unstable_loci	8
 covered_loci	57
 msings_score	0.1404
 msi_status	NEG
+tumor_mutation_burden	1/3006
 1:204494722-204494792	Not Covered
 1:243736176-243736246	Stable
 2:42476398-42476468	Stable

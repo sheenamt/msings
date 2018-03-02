@@ -208,7 +208,7 @@ class TestAnalyzer(TestBase):
         created_msi_output = os.path.join(msi_output_files, '0228T_CON_OPXv4_INT.MSI_Analysis.txt')
         baseline = os.path.join(msi_testfiles, 'testMSIcontrol')
         input_path = os.path.join(msi_testfiles,'0228T')
-        cmd=["msi", "count_msi_samples", baseline, input_path, "-o", created_msi_output]
+        cmd=["msi", "count_msi_samples", baseline, input_path, "--tumor_burden","-o", created_msi_output]
         subprocess.call(cmd)
         self.assertTrue(filecmp.cmp(expected_msi_output, created_msi_output))
 
@@ -235,11 +235,11 @@ class TestAnalyzer(TestBase):
 
     def testCountMSISummary(self):
         """Test the output creation"""
-        expected_msi_output = os.path.join(msi_testfiles, 'expected_test_msi_output')
+        expected_msi_output = os.path.join(msi_testfiles, 'expected_count_msi_samples_output')
         created_msi_output = os.path.join(msi_output_files, 'count_msi_summary_test_msi_output')
         baseline = os.path.join(msi_testfiles, 'testMSIcontrol')
         input_path = os.path.join(msi_testfiles,'msi_txt')
-        cmd=["msi", "count_msi_samples", baseline, input_path, "-o", created_msi_output]
+        cmd=["msi", "count_msi_samples", baseline, input_path, "--tumor_burden","-o", created_msi_output]
         subprocess.call(cmd)
         #count msi returns a ^M in the header, compare by lines
         self.assertTrue(cmp_lines(expected_msi_output, created_msi_output))
@@ -249,7 +249,7 @@ class TestAnalyzer(TestBase):
         expected_msi_output = os.path.join(msi_testfiles, 'expected_test_msi_output')
         created_msi_output = os.path.join(msi_output_files, 'created_top_level_output')
         input_path = os.path.join(msi_testfiles,'MSI_Analysis_txt')
-        cmd=["msi", "create_summary", input_path, "-o", created_msi_output]
+        cmd=["msi", "create_summary", input_path,"-o", created_msi_output]
         subprocess.call(cmd)
         self.assertTrue(filecmp.cmp(expected_msi_output, created_msi_output))
 

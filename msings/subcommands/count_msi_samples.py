@@ -89,7 +89,7 @@ def action(args):
         msi_fields.append('tumor_mutation_burden')
 
     writer = csv.writer(args.outfile,delimiter = '\t')
-    fieldnames.strip()
+    fieldnames
     writer.writerow(fieldnames)
     
     #next print the msi status info, then remove from dataframe before printing each loci detail

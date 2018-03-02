@@ -1,5 +1,5 @@
 """
-Create the summary file of all MSI_Analysis files in folder, requires output of count_msi_samples for each sample. No recalculation happening in this script.
+Create the summary file of all MSI_Analysis files in folder, requires output of count_msi_samples for each sample. No recalculation happens in this script.
 
 Usage:
 
@@ -37,6 +37,6 @@ def action(args):
         if top_level_df.empty:
             top_level_df=df_pfxinfo
         else:
-            top_level_df=pd.merge(top_level_df, df_pfxinfo)
+            top_level_df=pd.merge(top_level_df, df_pfxinfo, how='left')
 
     top_level_df.to_csv(args.outfile, na_rep=' ', index=False, header=True, sep='\t')
