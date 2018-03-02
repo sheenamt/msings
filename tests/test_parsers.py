@@ -48,7 +48,7 @@ class TestParsers(TestBase):
         prefixes = []
         variant_keys = []
         control_info=open(path.join(testMSIfile, 'testMSIcontrol'),'rU')
-        files = walker(testMSIfile)        
+        files = walker(path.join(testMSIfile, 'msi_txt'))
         analysis_type='parsers.parse_msi'
         multiplier=2.0
         threshold=[0.2, 0.9]

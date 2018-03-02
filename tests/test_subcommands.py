@@ -28,6 +28,7 @@ import __init__ as config
 log = logging.getLogger(__name__)
 
 msi_testfiles = path.join(config.datadir, 'MSI')
+msi_output_files = config.outputdir
 
 control ='5437_E05_OPXv4_NA12878_MA0013'
 
@@ -128,6 +129,17 @@ MSI_LOCI={'1': {'1-5': {'start': '1',
                         'indels': {}}}}
 
                 
+def cmp_lines(path_1, path_2):
+    l1 = l2 = ' '
+    with open(path_1, 'rb') as f1, open(path_2, 'rb') as f2:
+        while l1 != '' and l2 != '':
+            l1 = f1.readline().rstrip()
+            l2 = f2.readline().rstrip()
+            if l1 != l2:
+                return False
+                
+    return True
+
 class TestFormatter(TestBase):
     """
     Test the msi formatter script
@@ -216,12 +228,56 @@ class TestAnalyzer(TestBase):
         stdev=analyzer.calc_std_peaks(peaks)
         self.assertEqual(stdev, '0.410894')
 
-    def testCountMSI(self):
+    def testCountMSIsample1(self):
         """Test the output creation"""
-        expected_msi_output = os.path.join(msi_testfiles, 'expected_test_msi_output')
-        created_msi_output = os.path.join(msi_testfiles, 'created_test_msi_output')
+        expected_msi_output = os.path.join(msi_testfiles, 'MSI_Analysis_txt','0228T_CON_OPXv4_INT.MSI_Analysis.txt')
+        created_msi_output = os.path.join(msi_output_files, '0228T_CON_OPXv4_INT.MSI_Analysis.txt')
         baseline = os.path.join(msi_testfiles, 'testMSIcontrol')
-        cmd=["msi", "count_msi_samples", baseline, msi_testfiles, "-o", created_msi_output]
+        input_path = os.path.join(msi_testfiles,'0228T')
+        cmd=["msi", "count_msi_samples", baseline, input_path, "--tumor_burden", "-o", created_msi_output]
         subprocess.call(cmd)
         self.assertTrue(filecmp.cmp(expected_msi_output, created_msi_output))
+
+    def testCountMSIsample2(self):
+        """Test the output creation"""
+        expected_msi_output = os.path.join(msi_testfiles,'MSI_Analysis_txt','5437_E05_OPXv4_NA12878_MA0013.MSI_Analysis.txt')
+        created_msi_output = os.path.join(msi_output_files, '5437_E05_OPXv4_NA12878_MA0013.MSI_Analysis.txt')
+        baseline = os.path.join(msi_testfiles, 'testMSIcontrol')
+        input_path = os.path.join(msi_testfiles,'5437')
+        cmd=["msi", "count_msi_samples", baseline, input_path, "-o", created_msi_output]
+        subprocess.call(cmd)
+        self.assertTrue(filecmp.cmp(expected_msi_output, created_msi_output))
+
+    def testCountMSIsample3(self):
+        """Test the output creation"""
+        expected_msi_output = os.path.join(msi_testfiles,'MSI_Analysis_txt', '6037_E05_OPXv4_NA12878_HA0201.MSI_Analysis.txt')
+        created_msi_output = os.path.join(msi_output_files, '6037_E05_OPXv4_NA12878_HA0201.MSI_Analysis.txt')
+        baseline = os.path.join(msi_testfiles, 'testMSIcontrol')
+        input_path = os.path.join(msi_testfiles,'6037')
+        cmd=["msi", "count_msi_samples", baseline, input_path, "-o", created_msi_output]
+
+        subprocess.call(cmd)
+        self.assertTrue(filecmp.cmp(expected_msi_output, created_msi_output))
+
+    def testCountMSISummary(self):
+        """Test the output creation"""
+        expected_msi_output = os.path.join(msi_testfiles, 'expected_test_msi_output')
+        created_msi_output = os.path.join(msi_output_files, 'count_msi_summary_test_msi_output')
+        baseline = os.path.join(msi_testfiles, 'testMSIcontrol')
+        input_path = os.path.join(msi_testfiles,'msi_txt')
+        cmd=["msi", "count_msi_samples", baseline, input_path, "--tumor_burden", "-o", created_msi_output]
+        subprocess.call(cmd)
+        #count msi returns a ^M in the header, compare by lines
+        self.assertTrue(cmp_lines(expected_msi_output, created_msi_output))
+
+    def testCreateSummary(self):
+        """Test the output creation"""
+        expected_msi_output = os.path.join(msi_testfiles, 'expected_test_msi_output')
+        created_msi_output = os.path.join(msi_output_files, 'created_top_level_output')
+        input_path = os.path.join(msi_testfiles,'MSI_Analysis_txt')
+        cmd=["msi", "create_summary", input_path, "-o", created_msi_output]
+        subprocess.call(cmd)
+        self.assertTrue(filecmp.cmp(expected_msi_output, created_msi_output))
+
+
 
