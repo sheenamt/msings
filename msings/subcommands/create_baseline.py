@@ -20,6 +20,7 @@ from numpy import std, array, average, sum
 
 from msings.parsers import parse_msi
 from msings.utils import walker
+from msings.filters import msi_file_finder
 
 def build_parser(parser):
 
@@ -28,13 +29,6 @@ def build_parser(parser):
     parser.add_argument('-o', '--outfile', type=argparse.FileType('w'),
                         default=sys.stdout,
                         help='Name of the output file')
-    
-
-def msi_file_finder(pth):
-    """
-    Return True if pth represents an analysis file.
-    """
-    return bool(re.search(r'.msi.txt', pth.fname))
     
 
 Path = namedtuple('Path', ['dir','fname'])
