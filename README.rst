@@ -20,6 +20,7 @@ Dependencies:
 * Tested on Ubuntu 12.04, 14.04
 * Python 2.7.x
 * git
+* virtualenv
 
 Installation:
 -------------
