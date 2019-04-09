@@ -203,7 +203,7 @@ def calc_summary_stats(output_info, cutoff):
             num_peaks, peaks=calc_number_peaks(info['indels'], sites, highest_frac, cutoff)
             stdev=calc_std_peaks(peaks.values())
             #Sort the peak list naturally (-3,-2,-1,0,1,2,3)
-            peak_list=(" ").join(str(x) for x in natsort.natsorted(peaks.values()))
+            peak_list=(" ").join(str(x) for x in natsort.realsorted(peaks.values()))
         elif average_depth !=0:
             #if there are no indels, but there are wild type reads
             wildtype_fraction=1
