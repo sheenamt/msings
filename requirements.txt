@@ -1,1 +1,2 @@
-numpy==1.11.1
+natsort==7.0.1
+numpy==1.19.0
