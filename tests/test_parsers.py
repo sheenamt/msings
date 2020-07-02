@@ -12,7 +12,6 @@ import json
 import csv
 
 from operator import itemgetter
-from itertools import ifilter
 from collections import namedtuple, defaultdict
 from msings.utils import walker
 from msings import parsers, filters
@@ -21,7 +20,6 @@ from msings import parsers, filters
 from __init__ import TestBase
 import __init__ as config
 
-log = logging.getLogger(__name__)
 
 testMSIfile = path.join(config.datadir, 'MSI')
 
@@ -31,14 +29,11 @@ class TestParsers(TestBase):
     def setUp(self):
         self.outdir = self.mkoutdir()
 
-    def tearDown(self):
-        pass
-
     def testMSIParser(self):
         specimens = defaultdict(dict)
         prefixes = []
         variant_keys = []
-        control_info=open(path.join(testMSIfile, 'testMSIcontrol'),'rU')
+        control_info=open(path.join(testMSIfile, 'testMSIcontrol'),'r')
         files = walker(testMSIfile)        
         files = filter(filters.msi_file_finder,files)
         analysis_type='parsers.parse_msi'
@@ -49,4 +44,4 @@ class TestParsers(TestBase):
         self.assertListEqual(sorted(prefixes),sorted(['0228T_CON_OPXv4_INT', '5437_E05_OPXv4_NA12878_MA0013', '6037_E05_OPXv4_NA12878_HA0201']))
         self.assertListEqual(sorted(fieldnames), sorted(['0228T_CON_OPXv4_INT', '5437_E05_OPXv4_NA12878_MA0013', '6037_E05_OPXv4_NA12878_HA0201', 'Position']))
         self.assertListEqual(variant_keys, ['Position'])
-        
+        control_info.close()
