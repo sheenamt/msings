@@ -14,11 +14,9 @@ import re
 import natsort
 
 from collections import defaultdict, namedtuple
-from itertools import groupby, ifilter
+from itertools import groupby
 from operator import itemgetter
-from numpy import std, array, average, sum
-
-from msings.parsers import parse_msi
+from numpy import std, array, average
 from msings.utils import walker
 
 def build_parser(parser):
@@ -39,21 +37,12 @@ def msi_file_finder(pth):
 
 Path = namedtuple('Path', ['dir','fname'])
 
-def walker(dir):
-    """Recursively traverse direcory `dir`. For each tuple containing
-    (path, dirs, files) return a named tuple with attributes (dir,
-    fname) for each file name in `files`.
-    """
-    for (pth, dirs, files) in os.walk(dir):
-        for fname in files:
-            yield Path(pth, fname)
-
 def action(args):
     control = defaultdict(list)
     # apply a series of filters to files
-    files = ifilter(msi_file_finder, walker(args.path))
+    files = filter(msi_file_finder, walker(args.path))
     #sort the files so that the output in the workbook is sorted
-    files = sorted(files)
+    files = natsort.natsorted(files)
 
     for pth in files:
         with open(os.path.join(pth.dir, pth.fname)) as fname:
@@ -66,7 +55,7 @@ def action(args):
     header = ['Position', 'Standard_Deviation', 'Average_Number_Peaks', 'Count']
     writer = csv.writer(args.outfile, quoting=csv.QUOTE_MINIMAL, delimiter='\t')
     writer.writerow(header)
-    for k, v in natsort.natsorted(control.items()):
+    for k, v in sorted(control.items()):
         count = len(v)
         a = array(v)
         std_d = a.std()

@@ -6,11 +6,9 @@ Usage:
 msi formatter /path/to/bed/file -o /path/to/outfile
 
 """
-import os
 import csv
 import sys
 import argparse
-import re
 import natsort
 from collections import defaultdict
 
@@ -51,7 +49,6 @@ def action(args):
     # prepare a dictionary of chromosome: set(positions)
     # includes all positions between start-stop
     ranges = defaultdict(set)
-    msi_calls=defaultdict()
     writer=csv.writer(output,delimiter='\t')
     for row in bedfile:
         chr, beg, end = coords(row)

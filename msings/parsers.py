@@ -8,10 +8,8 @@ import sys
 import copy
 import natsort
 
-from itertools import count, groupby, chain, ifilter , izip_longest
+from itertools import groupby
 from operator import itemgetter
-
-from msings import filters
 
 """Each function parses a group of sample files for desired information,
 grouping based on the variant_keys list,

@@ -6,18 +6,12 @@ Usage:
 msi analyzer /path/to/sample/file /path/to/bed/file -o /path/to/outfile
 """
 
-import os
 import csv
 import sys
 import argparse
-import re
-import pprint
 import natsort
 
-from operator import itemgetter
-from itertools import chain, groupby
 from numpy import std, array, ceil
-from collections import defaultdict
 from msings.utils import multi_split
 
 def build_parser(parser):
@@ -44,11 +38,13 @@ def calc_msi_dist(variant,msi_site):
     # for variant in msi_sites:
     info={}
     #reference/WT info:
-    wildtype_reads=variant['base:reads:strands:avg_qual:map_qual:plus_reads:minus_reads'].split(':')[1]
+#    print(variant)
+#    wildtype_reads=variant['base:reads:strands:avg_qual:map_qual:plus_reads:minus_reads'].split(':')[1]
+ #   print(wildtype_reads)
     #Grab all the deletions
-    dels = filter(lambda s: "DEL" in str(s), variant['Misc'])
+    dels = list(filter(lambda s: "DEL" in str(s), variant['Misc']))
     #And all the insertions
-    ins =  filter(lambda s: "INS" in str(s), variant['Misc'])
+    ins =  list(filter(lambda s: "INS" in str(s), variant['Misc']))
     sites=dels + ins
 
     #Want total depth to reflect all sites, not just DEL/INS
@@ -126,7 +122,7 @@ def calc_wildtype(indels, wildtype_ave_depth, wildtype_fraction, highest_frac):
         wt_frac = float(wildtype_fraction)
     wildtype=":".join([str(0), str(wt_frac), str(wildtype_ave_depth)])
     sites[0]=wildtype
-
+    
     return sites
 
 def calc_highest_peak(info, wt_fraction, average_depth):
@@ -167,10 +163,11 @@ def calc_std_peaks(peaks):
     std_peaks=[]
     for peak in peaks:
         allele=peak.split(':')
-        i=0
+########Possibly don't need this i
+        #        i=0
         for i in range (0,int(allele[2])):
             std_peaks.append(int(allele[0]))
-            i=+1
+#            i=+1
     a=array(std_peaks)
     stddev=format(std(a),'.6f')
     
@@ -199,11 +196,13 @@ def calc_summary_stats(output_info, cutoff):
             sites[0]='0:0:0'
         if info['indels']:
             highest_frac = calc_highest_peak(info['indels'], wildtype_fraction, average_depth)
-            sites=calc_wildtype(info['indels'].keys(), wildtype_ave_depth, wildtype_fraction, highest_frac)
+            sites=calc_wildtype(list(info['indels'].keys()), wildtype_ave_depth, wildtype_fraction, highest_frac)
             num_peaks, peaks=calc_number_peaks(info['indels'], sites, highest_frac, cutoff)
             stdev=calc_std_peaks(peaks.values())
             #Sort the peak list naturally (-3,-2,-1,0,1,2,3)
-            peak_list=(" ").join(str(x) for x in natsort.natsorted(peaks.values()))
+            peak_list=(" ").join(str(x) for x in natsort.realsorted(peaks.values()))
+#            peak_list=(" ").join(str(x) for x in sorted(peaks.values()))
+ 
         elif average_depth !=0:
             #if there are no indels, but there are wild type reads
             wildtype_fraction=1
@@ -236,7 +235,7 @@ def parse_msi_bedfile(row, msi_sites, output_info):
     if not row['chrom'] in msi_sites.keys():
         msi_sites[row['chrom']]={}
 
-    for position in xrange(int(row['start']),int(row['end'])+1):
+    for position in range(int(row['start']),int(row['end'])+1):
         msi_sites[row['chrom']][position] = msi_loci
 
     output_info[msi_loci]={'Name':row['name'],
@@ -256,11 +255,11 @@ def action(args):
     msi_sites={}
     output_info={}
     output = {}
-    for row in csv.DictReader(args.bedfile, delimiter='\t', fieldnames=['chrom','start','end','name']):
+    for row in csv.DictReader(bedfile, delimiter='\t', fieldnames=['chrom','start','end','name']):
         msi_sites, output_info = parse_msi_bedfile(row, msi_sites, output_info)
-        
+
     # now we start processing the sample msi info
-    sample_msi=csv.DictReader(args.msi_file, delimiter='\t', restkey='Misc')
+    sample_msi=csv.DictReader(msifile, delimiter='\t', restkey='Misc')
 
     #Evaluate the sample-info vs msi-bed info, grouping on chromosome. 
     for row in sample_msi:
@@ -268,10 +267,9 @@ def action(args):
         output_info[loci_name].update(calc_msi_dist(row, output_info[loci_name]))
     output.update(calc_summary_stats(output_info, cutoff))
     fieldnames=['Position','Name','Average_Depth','Number_of_Peaks','Standard_Deviation','IndelLength:AlleleFraction:SupportingCalls']
-
-    writer = csv.DictWriter(args.outfile, fieldnames = fieldnames,  extrasaction = 'ignore', delimiter = '\t')
+    writer = csv.DictWriter(outfile, fieldnames = fieldnames,  extrasaction = 'ignore', delimiter = '\t')
     writer.writeheader()
-    for key, row in natsort.natsorted(output.iteritems()):
-       writer.writerow(dict(row, **{'Position': key}))
+    for key, row in natsort.natsorted(output.items()):
+        writer.writerow(dict(row, **{'Position': key}))
     
 

@@ -6,19 +6,13 @@ Usage:
 msi count_msi_samples  /path/to/baseline/file /path/to/sample/files -m 2.5 -t 0.1 0.7 -o output_file
 
 """
-import os
 import csv
 import sys
 import argparse
-import re
 import natsort
 
-from collections import defaultdict, namedtuple
-from itertools import groupby, ifilter
-from operator import itemgetter
-from numpy import std, array, average, sum
+from collections import defaultdict
 
-from msings.parsers import parse_msi
 from msings.utils import walker
 from msings import filters
 
