@@ -13,22 +13,6 @@ from msings import subcommands, __version__ as version
 
 def main(argv):
     action, arguments = parse_arguments(argv)
-
-    loglevel = {
-        0: logging.ERROR,
-        1: logging.WARNING,
-        2: logging.INFO,
-        3: logging.DEBUG,
-    }.get(arguments.verbosity, logging.DEBUG)
-
-    if arguments.verbosity > 1:
-        logformat = '%(levelname)s %(module)s %(lineno)s %(message)s'
-    else:
-        logformat = '%(message)s'
-
-    # set up logging
-    logging.basicConfig(file=sys.stdout, format=logformat, level=loglevel)
-
     return action(arguments)
 
 def parse_arguments(argv):
