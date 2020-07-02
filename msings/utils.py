@@ -1,15 +1,9 @@
-from collections import Iterable
 import datetime
 import re
 import os
 import shutil
-import logging
 from collections import namedtuple
 
-
-from __init__ import __version__
-
-log = logging.getLogger(__name__)
 Path = namedtuple('Path', ['dir','fname'])
 
 ASSAYS={'OPX':'OncoPlex',    
@@ -39,35 +33,35 @@ def munge_pfx(pfx):
     if len(output)==5:
         #New control samples hit this
         keys=['sample_id','well','library-version','control','machine-run']
-        pfx_info = dict(zip(keys,output))
+        pfx_info = dict(list(zip(keys,output)))
         pfx_info['mini-pfx']='{sample_id}_{control}'.format(**pfx_info)
         pfx_info['run']=pfx_info['sample_id'][:-2]
         pfx_info['pfx']='{sample_id}_{well}_{library-version}_{control}_{machine-run}'.format(**pfx_info)
-        pfx_info['assay']=[value for key,value in ASSAYS.items() if re.search(key, pfx_info['library-version'])][0]
+        pfx_info['assay']=[value for key,value in list(ASSAYS.items()) if re.search(key, pfx_info['library-version'])][0]
     elif len(output)==4:
         #New non-control samples hit this
         keys=['sample_id','well','library-version','machine-run']
-        pfx_info = dict(zip(keys,output))
+        pfx_info = dict(list(zip(keys,output)))
         pfx_info['mini-pfx']='{sample_id}'.format(**pfx_info)
         pfx_info['run']=pfx_info['sample_id'][:-2]
         pfx_info['pfx']='{sample_id}_{well}_{library-version}_{machine-run}'.format(**pfx_info)
-        pfx_info['assay']=[value for key,value in ASSAYS.items() if re.search(key, pfx_info['library-version'])][0]
+        pfx_info['assay']=[value for key,value in list(ASSAYS.items()) if re.search(key, pfx_info['library-version'])][0]
     elif len(output)==3:
         #Research non-control samples often hit this
         keys=['sample_id','well','library-version']
-        pfx_info = dict(zip(keys,output))
+        pfx_info = dict(list(zip(keys,output)))
         pfx_info['mini-pfx']='{sample_id}'.format(**pfx_info)
         pfx_info['run']=pfx_info['sample_id'][:-2]
         pfx_info['pfx']='{sample_id}_{well}_{library-version}'.format(**pfx_info)
-        pfx_info['assay']=[value for key,value in ASSAYS.items() if re.search(key, pfx_info['library-version'])][0]
+        pfx_info['assay']=[value for key,value in list(ASSAYS.items()) if re.search(key, pfx_info['library-version'])][0]
     elif len(output)==2:
         #MSI-Plus will hit this
         keys=['sample_id', 'library-version']
-        pfx_info = dict(zip(keys,output))
+        pfx_info = dict(list(zip(keys,output)))
         pfx_info['mini-pfx']='{sample_id}'.format(**pfx_info)
         pfx_info['pfx']='{sample_id}'.format(**pfx_info)
         if re.search('msi',pfx_info['library-version'], re.IGNORECASE):
-            pfx_info['assay']=[value for key,value in ASSAYS.items() if re.search(key, pfx_info['library-version'])]
+            pfx_info['assay']=[value for key,value in list(ASSAYS.items()) if re.search(key, pfx_info['library-version'])]
     elif len(output)==1:
         #Only the old LMG/OPX should hit this. 
         pfx=output[0]
@@ -118,7 +112,7 @@ def mkdir(dirpath, clobber = False):
 
     try:
         os.mkdir(dirpath)
-    except OSError, msg:
+    except OSError as msg:
         pass
 
     if not os.path.exists(dirpath):
@@ -139,7 +133,7 @@ def munge_path(pth):
     else:
         output=output[-3:]
     keys=['date','run', 'project']
-    pathinfo = dict(zip(keys,output))
+    pathinfo = dict(list(zip(keys,output)))
     pathinfo['date']=munge_date(pathinfo['date'])
     #Set Machine
     if re.search('HA', pathinfo['run']):
