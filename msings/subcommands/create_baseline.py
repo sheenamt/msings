@@ -18,6 +18,7 @@ from itertools import groupby
 from operator import itemgetter
 from numpy import std, array, average
 from msings.utils import walker
+from msings import filters
 
 def build_parser(parser):
 
@@ -28,19 +29,10 @@ def build_parser(parser):
                         help='Name of the output file')
     
 
-def msi_file_finder(pth):
-    """
-    Return True if pth represents an analysis file.
-    """
-    return bool(re.search(r'.msi.txt', pth.fname))
-    
-
-Path = namedtuple('Path', ['dir','fname'])
-
 def action(args):
     control = defaultdict(list)
     # apply a series of filters to files
-    files = filter(msi_file_finder, walker(args.path))
+    files = filter(filters.msi_file_finder, walker(args.path))
     #sort the files so that the output in the workbook is sorted
     files = natsort.natsorted(files)
 
