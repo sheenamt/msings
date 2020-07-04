@@ -95,8 +95,8 @@ class TestAnalyzer(TestBase):
         """Test MSI site distribution calculation"""
         self.maxDiff = None
         output_info = copy.deepcopy(OUTPUT_RAW)
-        with open(path.join(msi_testfiles, 'test.msi_output')) as sample_msi:
-            for row in csv.DictReader(sample_msi, delimiter='\t', restkey='Misc'):
+        with open(path.join(msi_testfiles, 'test.mpileup')) as sample_msi:
+             for row in csv.DictReader(sample_msi, delimiter='\t',fieldnames=['chrom','position','ref_base','depth','read_info','qual']):
                 loci_position = MSI_LOCI[row['chrom']][int(row['position'])]
                 output_info[loci_position].update(analyzer.calc_msi_dist(row, output_info[loci_position]))
 
