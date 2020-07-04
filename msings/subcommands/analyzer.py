@@ -10,9 +10,8 @@ import csv
 import sys
 import argparse
 import natsort
-
+import re
 from numpy import std, array, ceil
-from msings.utils import multi_split
 
 def build_parser(parser):
     parser.add_argument('msi_file', 
@@ -56,7 +55,7 @@ def calc_msi_dist(variant,msi_site):
     #Now process DEL/INS specific info
     #Parse the obvious variant format: 'DEL-3-AAA:1:1:23:1:1:0'
     for entry in sites:
-        info=multi_split(entry.strip(), ":-")
+        info=re.split('[:-]', entry.strip())
         if info[0]=='DEL':
             length=int(info[1])*int(-1)
         elif info[0]=='INS':
