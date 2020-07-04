@@ -12,12 +12,12 @@ import argparse
 import natsort
 import re
 from numpy import std, array, ceil
-
+from collections import Counter
 def build_parser(parser):
-    parser.add_argument('msi_file', 
+    parser.add_argument('mmpileup', 
                         type=argparse.FileType('rU'),
                         default=sys.stdin,
-                        help='Path to the msi output ')
+                        help='Path to the mpileup file ')
     parser.add_argument('bedfile', 
                         type=argparse.FileType('rU'),
                         default=sys.stdin,
@@ -36,14 +36,13 @@ def calc_msi_dist(variant,msi_site):
     """
     # for variant in msi_sites:
     info={}
-    #reference/WT info:
-#    print(variant)
-#    wildtype_reads=variant['base:reads:strands:avg_qual:map_qual:plus_reads:minus_reads'].split(':')[1]
- #   print(wildtype_reads)
     #Grab all the deletions
-    dels = list(filter(lambda s: "DEL" in str(s), variant['Misc']))
+    del_pat=re.compile('[-]\d+[ATGC]+')
+    dels = Counter(re.findall(del_pat,variant['read_info'].upper()))
     #And all the insertions
-    ins =  list(filter(lambda s: "INS" in str(s), variant['Misc']))
+    ins_pat=re.compile('[+]\d+[ATGC]+')
+    ins = Counter(re.findall(ins_pat,variant['read_info'].upper()))
+    #Create a list of all indel sites
     sites=dels + ins
 
     #Want total depth to reflect all sites, not just DEL/INS
@@ -53,14 +52,12 @@ def calc_msi_dist(variant,msi_site):
     msi_site['total_sites']+=1
 
     #Now process DEL/INS specific info
-    #Parse the obvious variant format: 'DEL-3-AAA:1:1:23:1:1:0'
-    for entry in sites:
-        info=re.split('[:-]', entry.strip())
-        if info[0]=='DEL':
+    for info in sites:
+        if info[0]=='-':
             length=int(info[1])*int(-1)
-        elif info[0]=='INS':
+        elif info[0]=='+':
             length=int(info[1])
-        reads=int(info[3])
+        reads=sites[info]
         #Want a total mutant depth for this loci 
         msi_site['total_mutant_depth']=msi_site['total_mutant_depth']+reads
         #Keep tally of mutants seen 
@@ -162,11 +159,8 @@ def calc_std_peaks(peaks):
     std_peaks=[]
     for peak in peaks:
         allele=peak.split(':')
-########Possibly don't need this i
-        #        i=0
         for i in range (0,int(allele[2])):
             std_peaks.append(int(allele[0]))
-#            i=+1
     a=array(std_peaks)
     stddev=format(std(a),'.6f')
     
@@ -200,8 +194,6 @@ def calc_summary_stats(output_info, cutoff):
             stdev=calc_std_peaks(peaks.values())
             #Sort the peak list naturally (-3,-2,-1,0,1,2,3)
             peak_list=(" ").join(str(x) for x in natsort.realsorted(peaks.values()))
-#            peak_list=(" ").join(str(x) for x in sorted(peaks.values()))
- 
         elif average_depth !=0:
             #if there are no indels, but there are wild type reads
             wildtype_fraction=1
@@ -258,8 +250,7 @@ def action(args):
         msi_sites, output_info = parse_msi_bedfile(row, msi_sites, output_info)
 
     # now we start processing the sample msi info
-    sample_msi=csv.DictReader(msifile, delimiter='\t', restkey='Misc')
-
+    sample_msi=csv.DictReader(msifile, delimiter='\t', fieldnames=['chrom','position','ref_base','depth','read_info','qual'])
     #Evaluate the sample-info vs msi-bed info, grouping on chromosome. 
     for row in sample_msi:
         loci_name = msi_sites[row['chrom']][int(row['position'])]
