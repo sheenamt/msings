@@ -12,7 +12,7 @@ import argparse
 import natsort
 
 from collections import defaultdict
-
+from msings.parsers import parse_msi
 from msings.utils import walker
 from msings import filters
 
