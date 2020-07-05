@@ -14,7 +14,7 @@ import re
 from numpy import std, array, ceil
 from collections import Counter
 def build_parser(parser):
-    parser.add_argument('mmpileup', 
+    parser.add_argument('mpileup', 
                         type=argparse.FileType('rU'),
                         default=sys.stdin,
                         help='Path to the mpileup file ')
@@ -239,7 +239,7 @@ def parse_msi_bedfile(row, msi_sites, output_info):
     return msi_sites, output_info
 
 def action(args):
-    msifile, bedfile, outfile = args.msi_file,args.bedfile, args.outfile
+    mpileup, bedfile, outfile = args.mpileup,args.bedfile, args.outfile
     # prepare a dictionary of chromosome: {range:set(),msi_range:{'start':'1','end':'20'}}
     # can test for membership efficiently
     cutoff=args.peak_fraction_cutoff
@@ -250,7 +250,7 @@ def action(args):
         msi_sites, output_info = parse_msi_bedfile(row, msi_sites, output_info)
 
     # now we start processing the sample msi info
-    sample_msi=csv.DictReader(msifile, delimiter='\t', fieldnames=['chrom','position','ref_base','depth','read_info','qual'])
+    sample_msi=csv.DictReader(mpileup, delimiter='\t', fieldnames=['chrom','position','ref_base','depth','read_info','qual'], quoting=csv.QUOTE_NONE)
     #Evaluate the sample-info vs msi-bed info, grouping on chromosome. 
     for row in sample_msi:
         loci_name = msi_sites[row['chrom']][int(row['position'])]
@@ -262,4 +262,4 @@ def action(args):
     for key, row in natsort.natsorted(output.items()):
         writer.writerow(dict(row, **{'Position': key}))
     
-
+        
