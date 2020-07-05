@@ -47,7 +47,7 @@ def action(args):
     header = ['Position', 'Standard_Deviation', 'Average_Number_Peaks', 'Count']
     writer = csv.writer(args.outfile, quoting=csv.QUOTE_MINIMAL, delimiter='\t')
     writer.writerow(header)
-    for k, v in sorted(control.items()):
+    for k, v in natsort.realsorted(control.items()):
         count = len(v)
         a = array(v)
         std_d = a.std()
