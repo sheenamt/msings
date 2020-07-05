@@ -17,11 +17,9 @@ def build_parser(parser):
         help='A required input file')
     parser.add_argument('outfile', 
         help='A required output file')
-
     parser.add_argument('-m','--monkey-type',
         action='store', default='rhesus',
         help="specify type of monkey [%(default)s]")
 
 def action(args):
-
-    print 'monkey type:', args.monkey_type
+    print('monkey type:', args.monkey_type)
