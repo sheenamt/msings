@@ -17,11 +17,11 @@ Authors:
 
 Dependencies:
 ^^^^^^^^^^^^^
-* Tested on Ubuntu 12.04, 14.04
-* Python 2.7.x
+* Tested on Ubuntu 18.04
+* Python 3.6.x
 * git
 * virtualenv
-* samtools (if using version newer than 0.1.18, the reference fasta is required)
+* samtools
   
 Installation:
 -------------
@@ -60,15 +60,11 @@ Required Input files:
 ----------------------
 1. bam file : sample of interest aligned against reference genome, provided in bam format. Index required. 
 
-2. ref_fasta : fasta file alignment was created with - in other words, your reference genome.  Must be indexed with bwa for use with samtools program (see below).  Please note that both your reference genome and bed files MUST follow the convention that chromosomes are numbered numerically or with "X" or "Y".  Other conventions (such as those bearing a "chr" prefix) are not supported.
+2. ref_fasta : fasta file alignment was created with - in other words, your reference genome.  Must be indexed for use with samtools program (see below).  Please note that both your reference genome and bed files MUST follow the convention that chromosomes are numbered numerically or with "X" or "Y".  Other conventions (such as those bearing a "chr" prefix) are not supported.
 
 3. msi_bed : MSI bed file (see example under "doc/mSINGS_TCGA.bed") - specifies the locations of the microsatellite tracts of interest.  NOTE:  must be sorted numerically and must not have a header line (see below), and must follow identical chromosome naming conventions as the reference genome.
 
 4. msi_baseline : MSI baseline file (see example under "doc/mSINGS_TCGA.baseline")  - describes the average and standard deviation of the number of expected signal peaks at each locus, as calculated from an MSI negative population (blood samples or MSI negative tumors).  User generates this file with msi create_baseline script (see below).  **IMPORTANT NOTE**:  Baseline statistics vary markedly from assay-to-assay and lab-to-lab.  It is **CRITICAL** that you prepare a baseline file that is specific for your analytic process, and for which data have been generated using the same protocols. 
-
-5. msi_intervals : MSI interval file (see example under "doc/mSINGS_TCGA.intervals")  - file for internal program use.  User makes this using create_intervals script.
-
-Please note that both your reference genome and bed files MUST follow the same naming convention of chromosomes (ie "chr1" or just "1", without the "chr" prefix).  Chromosomes are numbered numerically, or as "X" or "Y" - other chromsome names are not supported.
 
 Output files:
 -------------
@@ -84,7 +80,6 @@ Execution for Exome / TCGA data sets:
 This protocol will run the pipeline using the baseline file and microsatellite loci identified for TCGA exome data. Files specific for analysis of TCGA exome data are provided in the doc/ directory of this package. 
  * msi_baseline 
  * msi_bed 
- * msi_intervals 
 
 1. If you installed the virtualenv to a different location that the default scripts, you MUST edit the bash scripts to point to your virtual environment and your VarScan jar file
 
@@ -133,20 +128,17 @@ The following instructions will allow users to set up analysis for their custom 
 
 1. If you installed the virtualenv to a different location than the default scripts, you MUST edit the following bash scripts to point to your specific virtual environment
 
-scripts/create_intervals.sh:
->>> source /path/to/your/msings-virtual-environment/bin/activate
-   
 scripts/create_baseline.sh:
 >>> source /path/to/your/msings-virtual-environment/bin/activate
 
 scripts/run_msings.sh:
 >>> source /path/to/your/msings-virtual-environment/bin/activate
 
-2. If necessary, bwa format and create a bwa index for your reference genome:
+2. If not available, create an index for your reference genome using samtools:
 
->>>  bwa index -a bwtsw ref_fasta
+>>>  samtools faidx ref_fasta
 
-3. OPTIONAL: Now that we have CUSTOM_MSI_BED and CUSTOM_MSI_INTERVALS, you can update the create_baseline.sh script to point to these
+3. OPTIONAL: Now that we have CUSTOM_MSI_BED you can update the create_baseline.sh script to point to these
 
 >>> BEDFILE=/path/to/CUSTOM_MSI_BED;
 >>> REF_GENOME=/path/to/REF_GENOME;
@@ -160,7 +152,7 @@ scripts/run_msings.sh:
 5. Create the baseline. Run the create_baseline.sh script for the batch of samples. Output will be in subfolders of the BAM data, subfolders named after the samples themselves
 
 Default execution:
->>> scripts/create_baseline.sh PATH/TO/BAM_LIST PATH/TO/INTERVALS_FILE PATH/TO/BEDFILE PATH/TO/REF_GENOME
+>>> scripts/create_baseline.sh PATH/TO/BAM_LIST PATH/TO/BEDFILE PATH/TO/REF_GENOME
 
 If you already edited the create_baseline.sh script to point to your reference files, you can instead just run:
 >>> scripts/create_baseline.sh PATH/TO/BAM_LIST
