@@ -27,7 +27,6 @@ if [[ -z $PYTHON ]]; then
 fi
 
 SAMTOOLS_VERSION=0.1.18
-VARSCAN_VERSION=v2.3.7
 
 # Create a virtualenv using a specified version of the virtualenv
 # source.  This also provides setuptools and pip.  
@@ -54,9 +53,6 @@ pip install -U pip
 
 # install samtools 
 bash dev/install_samtools.sh ${SAMTOOLS_VERSION} $venv
-
-# install VARSCAN_VERSION=v2.3.7
-bash dev/install_varscan.sh ${VARSCAN_VERSION} $venv
 
 #Install numpy
 pip install -r requirements.txt
