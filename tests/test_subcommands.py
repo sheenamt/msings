@@ -18,8 +18,6 @@ from itertools import groupby
 from msings.subcommands import analyzer
 from msings.subcommands import count_msi_samples
 from msings.subcommands import create_baseline
-from msings.subcommands import formatter
-
 
 from tests.__init__ import TestBase
 import tests.__init__ as config
@@ -57,23 +55,6 @@ OUTPUT= {'1:1-5': {'Standard_Deviation': 0, 'Average_Depth': 100, 'Number_of_Pea
          '7:1-5': {'Standard_Deviation': '0.552771', 'Average_Depth': 100, 'Number_of_Peaks': 2, 'Name': 'MUT-BIG>AVE', 'IndelLength:AlleleFraction:SupportingCalls': '-1:0.09090909090909091:10 0:0.0:0 1:1.0:110'}, 
          '7:7-11': {'Standard_Deviation': 0, 'Average_Depth': 0, 'Number_of_Peaks': 0, 'Name': 'NO-COV', 'IndelLength:AlleleFraction:SupportingCalls': '0:0.0:0'},
          '8:1-5': {'Standard_Deviation': '0.140000', 'Average_Depth': 50, 'Number_of_Peaks': 1, 'Name': 'MUT-BIG<AVE', 'IndelLength:AlleleFraction:SupportingCalls': '-1:1.0:49 0:0.020408163265306124:1'}}
-
-class TestFormatter(TestBase):
-    """
-    Test the msi formatter script
-    """
-    def testCoords(self):
-        
-        row =['1', '45795895', '45795905', 'WT-ONLY']
-        output =('1', 45795895, 45795905)
-        self.assertEqual(formatter.coords(row), output)
-
-    def testMSIIntervalCreator(self):
-        ranges={'1': set([45795904, 45795905, 45795895, 45795896])}
-        data=[('1', 45795895, '-', 'T'), ('1', 45795896, '-', 'T'),
-              ('1', 45795904, '-', 'T'), ('1', 45795905, '-', 'T')]
-
-        self.assertEqual(formatter.msi_interval_creator(ranges), data)
 
 class TestAnalyzer(TestBase):
     """
