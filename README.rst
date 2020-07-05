@@ -21,7 +21,8 @@ Dependencies:
 * Python 2.7.x
 * git
 * virtualenv
-
+* samtools (if using version newer than 0.1.18, the reference fasta is required)
+  
 Installation:
 -------------
 Please ensure the dependencies are installed to the system. 
@@ -33,7 +34,7 @@ To install the software to a virtual environment in your current directory, run 
 >>> cd msings
 >>> bash dev/bootstrap.sh
 
-To use the virtualenv, including the programs (varscan, samtools, msi), run:
+To use the virtualenv, including the programs (samtools, msi), run:
 
 >>> source msings-env/bin/activate
 
@@ -45,7 +46,7 @@ To install the software (including creating a virtualenv) to a path of your choo
 
 NOTE:  Downloading the zipped file through this website will cause installation problems and is not supported. Please CLONE the repo. 
 
-Development (UW developers only):
+Development and test data (UW developers only):
 ------------------------------
 The devel.sh script builds a local virtualenv and downloads test data (if run from UW):
 
@@ -115,7 +116,7 @@ This protocol will run the pipeline using the baseline file and microsatellite l
 5. Run the analysis script for the batch of samples. Output will be in subfolders of the same directories containing the BAM data, subfolders are named after the samples themselves
 
 Default execution:
->>>  scripts/run_msings.sh PATH/TO/BAM_LIST PATH/TO/INTERVALS_FILE PATH/TO/BEDFILE PATH/TO/REF_GENOME PATH/TO/MSI_BASELINE
+>>>  scripts/run_msings.sh PATH/TO/BAM_LIST PATH/TO/BEDFILE PATH/TO/REF_GENOME PATH/TO/MSI_BASELINE
 
 If you already edited the run_msings.sh script to point to the reference files (either yours or the TCGA files in the doc/ folder), script may be run as follows:
 >>>  scripts/run_msings.sh PATH/TO/BAM_LIST
@@ -125,37 +126,28 @@ Execution for custom data sets:
 Files specific for analysis of TCGA exome data are provided in the doc/ directory of this package. To run mSINGS analysis use custom assays or custom targets, users are required to provide 3 custom files:
  * msi_baseline 
  * msi_bed 
- * msi_intervals 
 
 NOTE: loci PRESENT in the bed file that are ABSENT in the baseline file (created in step 8 below) will not be scored!
 
 The following instructions will allow users to set up analysis for their custom targets, to generate a custom baseline for those targets, and to run subsequent analysis.  Recommendations for design of custom assays and custom targets are provided in the Recommendations_for_custom_assays.txt file packaged with the repository.
 
-1. If you installed the virtualenv to a different location than the default scripts, you MUST edit the following bash scripts to point to your specific virtual environment and VarScan jar file
+1. If you installed the virtualenv to a different location than the default scripts, you MUST edit the following bash scripts to point to your specific virtual environment
 
 scripts/create_intervals.sh:
 >>> source /path/to/your/msings-virtual-environment/bin/activate
->>> VARSCAN=/path/to/your/msings-virtual-environment/bin/VarScan.v2.3.7.jar
    
 scripts/create_baseline.sh:
 >>> source /path/to/your/msings-virtual-environment/bin/activate
->>> VARSCAN=/path/to/your/msings-virtual-environment/bin/VarScan.v2.3.7.jar
 
 scripts/run_msings.sh:
 >>> source /path/to/your/msings-virtual-environment/bin/activate
->>> VARSCAN=/path/to/your/msings-virtual-environment/bin/VarScan.v2.3.7.jar
 
-2. Run the create_intervals.sh bash script to create the msi_intervals file for your custom assay. This will create an msi_intervals file in the same directory as the bed file specified
-
->>> scripts/create_intervals.sh PATH/TO/BEDFILE
-
-3. If necessary, bwa format and create a bwa index for your reference genome:
+2. If necessary, bwa format and create a bwa index for your reference genome:
 
 >>>  bwa index -a bwtsw ref_fasta
 
-4. OPTIONAL: Now that we have CUSTOM_MSI_BED and CUSTOM_MSI_INTERVALS, you can update the create_baseline.sh script to point to these
+3. OPTIONAL: Now that we have CUSTOM_MSI_BED and CUSTOM_MSI_INTERVALS, you can update the create_baseline.sh script to point to these
 
->>> INTERVALS_FILE=/path/to/CUSTOM_MSI_INTERVALS;
 >>> BEDFILE=/path/to/CUSTOM_MSI_BED;
 >>> REF_GENOME=/path/to/REF_GENOME;
 
@@ -178,17 +170,16 @@ NOTE: Loci are excluded from the baseline file if the number of samples are insu
 
 The baseline contstruction process only need to be done once per assay/target data set. Files may be saved and re-used for subsequent analyses. 
 
-9. OPTIONAL: Now we update the run_msings.sh to point to all the new custom files:
+6. OPTIONAL: Now we update the run_msings.sh to point to all the new custom files:
 
->>> INTERVALS_FILE=/path/to/CUSTOM_MSI_INTERVALS;
 >>> BEDFILE=/path/to/CUSTOM_BEDFILE;
 >>> MSI_BASELINE=/path/to/CUSTOM_MSI_BASELINE;
 >>> REF_GENOME=/path/to/REF_GENOME;
  
-10. Once the run_msings.sh script is updated for the new custom files, execution is the same as for Exome / TCGA data sets (above). 
+7. Once the run_msings.sh script is updated for the new custom files, execution is the same as for Exome / TCGA data sets (above). 
 
 Default execution:
->>>  scripts/run_msings.sh PATH/TO/BAM_LIST PATH/TO/INTERVALS_FILE PATH/TO/BEDFILE PATH/TO/REF_GENOME PATH/TO/MSI_BASELINE
+>>>  scripts/run_msings.sh PATH/TO/BAM_LIST PATH/TO/BEDFILE PATH/TO/REF_GENOME PATH/TO/MSI_BASELINE
 
 If you already edited the create_baseline.sh script to point to your reference files:
 >>>  scripts/run_msings.sh PATH/TO/BAM_LIST
