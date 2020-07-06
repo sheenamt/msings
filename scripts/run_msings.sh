@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-source /mnt/disk10/users/sheenams/msings-v3.5/msings-v3.6-py3/bin/activate
+source msings-env/bin/activate
 
 #BAM_LIST is a file of absolute paths to each bam file
 BAM_LIST=$1;
