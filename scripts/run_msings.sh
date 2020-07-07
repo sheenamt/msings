@@ -12,7 +12,7 @@ REF_GENOME=$4;
 if [ -z "$BAM_LIST" ]; then echo "BAM_LIST is unset" && exit ; else echo "BAM_LIST is set to '$BAM_LIST'"; fi
 if [ -z "$BEDFILE" ]; then echo "BEDFILE is unset" && exit ; else echo "BEDFILE is set to '$BEDFILE'"; fi
 if [ -z "$MSI_BASELINE" ]; then echo "MSI_BASELINE is unset" && exit ; else echo "MSI_BASELINE is set to '$MSI_BASELINE'"; fi
-if [ -z "$REF_GENOME"]; then echo "REF_GENOME is unset" && exit ; else echo "REF_GENOME is set to '$REF_GENOME'"; fi
+if [ -z "$REF_GENOME" ]; then echo "REF_GENOME is unset" && exit ; else echo "REF_GENOME is set to '$REF_GENOME'"; fi
 
 
 #"multiplier" is the number of standard deviations from the baseline that is required to call instability
