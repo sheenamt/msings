@@ -13,6 +13,9 @@ import natsort
 import re
 from numpy import std, array, ceil
 from collections import Counter
+
+csv.field_size_limit(sys.maxsize)
+
 def build_parser(parser):
     parser.add_argument('mpileup', 
                         type=argparse.FileType('rU'),
