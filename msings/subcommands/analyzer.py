@@ -50,13 +50,11 @@ def calc_msi_dist(variant,msi_site):
     msi_site['site_depth']=int(variant['depth'])
     #Keep tally of sites seen
     msi_site['total_sites']+=1
-
     #Now process DEL/INS specific info
     for info in sites:
+        length=int(re.findall(r'\d+',info)[0])
         if info[0]=='-':
-            length=int(info[1])*int(-1)
-        elif info[0]=='+':
-            length=int(info[1])
+            length=length*int(-1)
         reads=sites[info]
         #Want a total mutant depth for this loci 
         msi_site['total_mutant_depth']=msi_site['total_mutant_depth']+reads
