@@ -23,9 +23,6 @@ params = {'author': 'Sheena Todhunter',
           'scripts': ['msi'],
           'version': __version__,
           'package_data': {'msings': [join('data',f) for f in ['sha','ver']]},
-          'install_requires': [
-              'natsort==3.5.3',
-          ],
           }
 
 setup(**params)

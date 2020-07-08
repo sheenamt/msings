@@ -35,8 +35,7 @@ VENV_URL='http://pypi.python.org/packages/source/v/virtualenv'
 
 # Create virtualenv if necessary
 if [ ! -f $venv/bin/activate ]; then
-    virtualenv --python $PYTHON ${venv}
-    virtualenv --python $PYTHON --relocatable ${venv}
+    python3 -m venv ${venv}
 else
     echo "found existing virtualenv $venv"
 fi
