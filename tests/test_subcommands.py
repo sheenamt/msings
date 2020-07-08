@@ -38,7 +38,7 @@ OUTPUT_RAW={'1:1-5': {'total_depth': 0, 'Name': 'WT-ONLY', 'total_mutant_depth':
 
 MSI_SITE_DATA={'1:1-5': {'site_depth': 100, 'total_depth': 500, 'Name': 'WT-ONLY', 'mutant_tally': 0, 'total_mutant_depth': 0, 'total_sites': 5, 'indels': {}}, 
                '1:7-11': {'site_depth': 100, 'total_depth': 500, 'Name': 'WT-BIGGEST', 'mutant_tally': 6, 'total_mutant_depth': 30, 'total_sites': 5, 
-                          'indels': {1: {'site_depth': 300, 'mutant_tally': 3, 'allele_fraction': 0, 'mutant_depth': 14}, -3: {'site_depth': 300, 'mutant_tally': 3, 'allele_fraction': 0, 'mutant_depth': 16}}},
+                          'indels': {1: {'site_depth': 300, 'mutant_tally': 3, 'allele_fraction': 0, 'mutant_depth': 14}, -13: {'site_depth': 300, 'mutant_tally': 3, 'allele_fraction': 0, 'mutant_depth': 16}}},
                 '7:1-5': {'site_depth': 100, 'total_depth': 500, 'Name': 'MUT-BIG>AVE', 'mutant_tally': 4, 'total_mutant_depth': 120, 'total_sites': 5, 
                           'indels': {1: {'site_depth': 300, 'mutant_tally': 3, 'allele_fraction': 0, 'mutant_depth': 110}, -1: {'site_depth': 100, 'mutant_tally': 1, 'allele_fraction': 0, 'mutant_depth': 10}}}, 
                '7:7-11': {'site_depth': 0, 'total_depth': 0, 'Name': 'NO-COV', 'mutant_tally': 0, 'total_mutant_depth': 0, 'total_sites': 5, 'indels': {}}, 
@@ -51,7 +51,7 @@ MSI_SITE_DATA={'1:1-5': {'site_depth': 100, 'total_depth': 500, 'Name': 'WT-ONLY
 #'7:7-11' == no coverage
 #'8:1-5' mut buggest peak, but mutant depth < average depth
 OUTPUT= {'1:1-5': {'Standard_Deviation': 0, 'Average_Depth': 100, 'Number_of_Peaks': 1, 'Name': 'WT-ONLY', 'IndelLength:AlleleFraction:SupportingCalls': '0:1.0:100'}, 
-         '1:7-11': {'Standard_Deviation': '1.210124', 'Average_Depth': 100, 'Number_of_Peaks': 3, 'Name': 'WT-BIGGEST', 'IndelLength:AlleleFraction:SupportingCalls': '-3:0.2285714285714286:16 -2:0:0 -1:0:0 0:1.0:70 1:0.20000000000000004:14'}, 
+         '1:7-11': {'Standard_Deviation': '4.839049', 'Average_Depth': 100, 'Number_of_Peaks': 3, 'Name': 'WT-BIGGEST', 'IndelLength:AlleleFraction:SupportingCalls': '-13:0.2285714285714286:16 -12:0:0 -11:0:0 -10:0:0 -9:0:0 -8:0:0 -7:0:0 -6:0:0 -5:0:0 -4:0:0 -3:0:0 -2:0:0 -1:0:0 0:1.0:70 1:0.20000000000000004:14'}, 
          '7:1-5': {'Standard_Deviation': '0.552771', 'Average_Depth': 100, 'Number_of_Peaks': 2, 'Name': 'MUT-BIG>AVE', 'IndelLength:AlleleFraction:SupportingCalls': '-1:0.09090909090909091:10 0:0.0:0 1:1.0:110'}, 
          '7:7-11': {'Standard_Deviation': 0, 'Average_Depth': 0, 'Number_of_Peaks': 0, 'Name': 'NO-COV', 'IndelLength:AlleleFraction:SupportingCalls': '0:0.0:0'},
          '8:1-5': {'Standard_Deviation': '0.140000', 'Average_Depth': 50, 'Number_of_Peaks': 1, 'Name': 'MUT-BIG<AVE', 'IndelLength:AlleleFraction:SupportingCalls': '-1:1.0:49 0:0.020408163265306124:1'}}
@@ -80,7 +80,6 @@ class TestAnalyzer(TestBase):
              for row in csv.DictReader(sample_msi, delimiter='\t',fieldnames=['chrom','position','ref_base','depth','read_info','qual']):
                 loci_position = MSI_LOCI[row['chrom']][int(row['position'])]
                 output_info[loci_position].update(analyzer.calc_msi_dist(row, output_info[loci_position]))
-
         self.assertDictEqual(output_info, MSI_SITE_DATA)
 
     def testCalcSummaryStats(self):
@@ -141,7 +140,7 @@ class TestAnalyzer(TestBase):
         wt_ave=int(average_depth-msi_sites['total_mutant_depth'])
         wt_ave=int(wt_ave)
         sites=analyzer.calc_wildtype(msi_sites['indels'].keys(), wt_ave, wt_frac, wt_frac)
-        wt_output={0: '0:1.0:70', -1: '-1:0:0', -3: '-3:0:0', -2: '-2:0:0', 1: '1:0:0'}
+        wt_output={0: '0:1.0:70', -13: '-13:0:0', -12: '-12:0:0', -11: '-11:0:0', -10: '-10:0:0', -9: '-9:0:0', -8: '-8:0:0', -7: '-7:0:0', -6: '-6:0:0', -5: '-5:0:0', -4: '-4:0:0', -3: '-3:0:0', -2: '-2:0:0', -1: '-1:0:0', 1: '1:0:0'}
 
         self.assertDictEqual(sites, wt_output)
 
