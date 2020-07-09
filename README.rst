@@ -62,7 +62,7 @@ Required Input files:
 
 2. ref_fasta : fasta file alignment was created with - in other words, your reference genome.  Must be indexed for use with samtools program (see below).  Please note that both your reference genome and bed files MUST follow the convention that chromosomes are numbered numerically or with "X" or "Y".  Other conventions (such as those bearing a "chr" prefix) are not supported.
 
-3. msi_bed : MSI bed file (see example under "doc/mSINGS_TCGA.bed") - specifies the locations of the microsatellite tracts of interest.  NOTE:  must be sorted numerically and must not have a header line (see below), and must follow identical chromosome naming conventions as the reference genome.
+3. msi_bed : MSI bed file (see example under "doc/mSINGS_TCGA.bed") - specifies the locations of the microsatellite tracts of interest. In order to be compatible with the genomic coordinate systems used by samtools mpileup, the coordinates of microsatellite tracts in bed file should start at the position before the first base in the tract. NOTE:  must be sorted numerically and must not have a header line (see below), must be 0 indexed, and must follow identical chromosome naming conventions as the reference genome.
 
 4. msi_baseline : MSI baseline file (see example under "doc/mSINGS_TCGA.baseline")  - describes the average and standard deviation of the number of expected signal peaks at each locus, as calculated from an MSI negative population (blood samples or MSI negative tumors).  User generates this file with msi create_baseline script (see below).  **IMPORTANT NOTE**:  Baseline statistics vary markedly from assay-to-assay and lab-to-lab.  It is **CRITICAL** that you prepare a baseline file that is specific for your analytic process, and for which data have been generated using the same protocols. 
 
@@ -70,7 +70,6 @@ Output files:
 -------------
 For each sample run, the following will be produced:
  * SAMPLE.msi.txt = very detailed information about instability and distribution of alleles of differing length.  Raw data that is used to generate final MSI calls.
- * SAMPLE.msi_output.txt = output of Varscan readcounts function, an intermediate file.
  * SAMPLE.MSI_Analysis.txt = Binary matrix of interpreted instability (1) or stability (0) at each locus. Loci with insufficient coverage for instability calling are left blank. Summary statistics and interpretation of results are provided.
 
 For the entire run, a "top level" output represented as a binary matrix of interpreted instability (1) or stability (0) at each locus is provided if the count_msi.py function is run. Loci with insufficient coverage for instability calling are left blank. Summary statistics and interpretation of results are provided.
@@ -118,11 +117,12 @@ If you already edited the run_msings.sh script to point to the reference files (
 
 Execution for custom data sets:
 -------------------
-Files specific for analysis of TCGA exome data are provided in the doc/ directory of this package. To run mSINGS analysis use custom assays or custom targets, users are required to provide 3 custom files:
+Files specific for analysis of TCGA exome data are provided in the doc/ directory of this package. To run mSINGS analysis use custom assays or custom targets, users are required to provide 2 custom files:
  * msi_baseline 
  * msi_bed 
 
 NOTE: loci PRESENT in the bed file that are ABSENT in the baseline file (created in step 8 below) will not be scored!
+NOTE: In order to be compatible with the genomic coordinate systems used by samtools mpileup, the coordinates of microsatellite tracts in bed file should start at the position before the first base in the tract.
 
 The following instructions will allow users to set up analysis for their custom targets, to generate a custom baseline for those targets, and to run subsequent analysis.  Recommendations for design of custom assays and custom targets are provided in the Recommendations_for_custom_assays.txt file packaged with the repository.
 
@@ -183,7 +183,7 @@ Test to insure proper installation of scripts:
 >>>   cd msings
 >>>   source msings-env/bin/active
 >>>    ./testall
-        Ran 11 tests in 0.068s
+        Ran 9 tests in 0.068s
         OK
 
 https://bitbucket.org/uwlabmed/msings
