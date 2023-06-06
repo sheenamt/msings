@@ -36,12 +36,12 @@ for BAM in `sed '/^$/d' $BAM_LIST`; do
     echo "MSI Analyzer start" >> $SAVEPATH/$PFX/msi_run_log.txt;
     date +"%D %H:%M" >> $SAVEPATH/$PFX/msi_run_log.txt;
     
-    msi analyzer $SAVEPATH/$PFX/$PFX.mpileup $BEDFILE -o $SAVEPATH/$PFX/$PFX.msi.txt
+    msi analyzer $SAVEPATH/$PFX/$PFX.mpileup $BEDFILE -o $SAVEPATH/$PFX.msi.txt
     
     echo "MSI calls start" >> $SAVEPATH/$PFX/msi_run_log.txt;
     date +"%D %H:%M" >> $SAVEPATH/$PFX/msi_run_log.txt;
      
-    msi count_msi_samples $MSI_BASELINE $SAVEPATH/$PFX -m $multiplier -t $msi_min_threshold $msi_max_threshold -o $SAVEPATH/$PFX/$PFX.MSI_Analysis.txt
+  #  msi count_msi_samples $MSI_BASELINE $SAVEPATH/$PFX -m $multiplier -t $msi_min_threshold $msi_max_threshold -o $SAVEPATH/$PFX/$PFX.MSI_Analysis.txt
 
     echo “Completed Analysis of $PFX” >> $SAVEPATH/$PFX/msi_run_log.txt;
     date +"%D %H:%M" >> $SAVEPATH/$PFX/msi_run_log.txt;
